@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>{% block title %}Zero Hacker{% endblock %}</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="{{ url_for('static', filename='matrix.css') }}">
+</head>
+<body>
+	<canvas id="rain"></canvas>
+	<div class="transition" id="transition">
+		<div class="portal-overlay">
+			<div class="ring"></div><div class="ring"></div><div class="ring"></div>
+		</div>
+	</div>
+	<main class="container">
+		<header class="site-header">
+			<h1 class="brand">ZERO HACKER</h1>
+		</header>
+		<section class="content">
+			{% block content %}{% endblock %}
+		</section>
+		<footer class="site-footer">
+			<p>Matrix role-play challenge. Слава Руке Гроха.</p>
+		</footer>
+	</main>
+	<script src="{{ url_for('static', filename='matrix.js') }}"></script>
+	<script>
+	(function(){
+		const tr = document.getElementById('transition');
+		window.addEventListener('pageshow', ()=>{ tr.classList.add('hide'); });
+		Array.from(document.querySelectorAll('a[href]')).forEach(a=>{
+			if(a.target==='_blank') return;
+			a.addEventListener('click', (e)=>{ e.preventDefault(); tr.classList.remove('hide'); setTimeout(()=>{ window.location = a.href; }, 250); });
+		});
+	})();
+	</script>
+</body>
+</html>

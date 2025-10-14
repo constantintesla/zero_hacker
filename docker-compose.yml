@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    image: zero-hacker:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-matrix-green}
+      - PORT=8000
+    restart: unless-stopped
