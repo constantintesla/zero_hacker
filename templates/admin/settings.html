@@ -129,9 +129,10 @@
 				</div>
 				
             <div class="setting-group">
-                <label>Пароль для доступа:</label>
-                <input type="text" value="{{ settings.watermark.password_for_next }}" readonly class="input readonly">
-                <small class="help-text">Пароль берется из первого задания</small>
+                <label for="watermark_password_for_next">Пароль для доступа ко второму заданию:</label>
+                <input type="text" id="watermark_password_for_next" name="watermark_password_for_next" 
+                       value="{{ settings.watermark.password_for_next }}" class="input">
+                <small class="help-text">Пароль для перехода ко второму заданию</small>
             </div>
             
             <div class="setting-group">
@@ -147,8 +148,9 @@
             </div>
             
             <div class="setting-group">
-                <label>Пароль для третьего задания:</label>
-                <input type="text" value="HACK_COMPLETE" readonly class="input readonly">
+                <label for="hack_simulation_password_for_next">Пароль для третьего задания:</label>
+                <input type="text" id="hack_simulation_password_for_next" name="hack_simulation_password_for_next" 
+                       value="{{ settings.hack_simulation.get('password_for_next', 'HACK_COMPLETE') }}" class="input">
                 <small class="help-text">Пароль для доступа к декодированию IP</small>
             </div>
 			</div>

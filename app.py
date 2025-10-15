@@ -119,7 +119,8 @@ def decode_ip():
     if request.method == "POST":
         password = request.form.get('password', '')
         # Проверяем пароль из второго задания
-        if password == 'HACK_COMPLETE':  # Пароль из хакерской атаки
+        expected_password = TASK_SETTINGS['hack_simulation'].get('password_for_next', 'HACK_COMPLETE')
+        if password == expected_password:
             session['decode_authenticated'] = True
             return redirect(url_for('decode_dashboard'))
         else:
@@ -208,6 +209,16 @@ def admin_settings():
                 progress_phases.append(value)
         if progress_phases:
             TASK_SETTINGS['hack_simulation']['progress_phases'] = progress_phases
+        
+        # Обработка специальных полей паролей
+        if 'watermark_password_for_next' in request.form:
+            TASK_SETTINGS['watermark']['password_for_next'] = request.form.get('watermark_password_for_next')
+        
+        if 'hack_simulation_password_for_next' in request.form:
+            # Добавляем новое поле в настройки хакерской симуляции
+            if 'password_for_next' not in TASK_SETTINGS['hack_simulation']:
+                TASK_SETTINGS['hack_simulation']['password_for_next'] = 'HACK_COMPLETE'
+            TASK_SETTINGS['hack_simulation']['password_for_next'] = request.form.get('hack_simulation_password_for_next')
         
         flash('Настройки обновлены!', 'success')
         return redirect(url_for('admin_settings'))
