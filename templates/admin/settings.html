@@ -20,6 +20,31 @@
 	
 	<form method="POST" class="settings-form">
 		<div class="settings-grid">
+			<!-- Настройки админки -->
+			<div class="settings-section">
+				<h3>🔐 Настройки админки</h3>
+				
+				<div class="setting-group">
+					<label for="admin_username">Имя пользователя:</label>
+					<input type="text" id="admin_username" name="admin_username" 
+						   value="{{ admin_username }}" class="input">
+					<small class="help-text">Имя пользователя для входа в админку</small>
+				</div>
+				
+				<div class="setting-group">
+					<label for="admin_password">Пароль:</label>
+					<input type="password" id="admin_password" name="admin_password" 
+						   placeholder="Введите новый пароль" class="input">
+					<small class="help-text">Оставьте пустым, чтобы не изменять пароль</small>
+				</div>
+				
+				<div class="setting-group">
+					<label for="admin_password_confirm">Подтверждение пароля:</label>
+					<input type="password" id="admin_password_confirm" name="admin_password_confirm" 
+						   placeholder="Подтвердите новый пароль" class="input">
+				</div>
+			</div>
+			
 			<!-- Настройки водяных знаков -->
 			<div class="settings-section">
 				<h3>🎨 Задание 1: Водяные знаки</h3>
@@ -389,6 +414,27 @@ function resetToDefaults() {
 	}
 }
 
+// Валидация паролей
+document.addEventListener('DOMContentLoaded', function() {
+	const passwordField = document.getElementById('admin_password');
+	const confirmField = document.getElementById('admin_password_confirm');
+	
+	function validatePasswords() {
+		if (passwordField.value && confirmField.value) {
+			if (passwordField.value !== confirmField.value) {
+				confirmField.setCustomValidity('Пароли не совпадают');
+			} else {
+				confirmField.setCustomValidity('');
+			}
+		} else {
+			confirmField.setCustomValidity('');
+		}
+	}
+	
+	passwordField.addEventListener('input', validatePasswords);
+	confirmField.addEventListener('input', validatePasswords);
+});
+
 function uploadDefaultImage() {
 	const fileInput = document.getElementById('watermark_image');
 	if (fileInput.files.length === 0) {
@@ -417,7 +463,9 @@ function uploadDefaultImage() {
 		alert('Ошибка при загрузке изображения: ' + error);
 	});
 	}
-	
+</script>
+
+<style>
 	.input.readonly {
 		background: #333;
 		color: #999;
@@ -429,5 +477,5 @@ function uploadDefaultImage() {
 		color: #666;
 		margin-top: 5px;
 	}
-</script>
+</style>
 {% endblock %}

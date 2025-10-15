@@ -165,6 +165,26 @@ def admin_settings():
         return redirect(url_for('admin_login'))
     
     if request.method == "POST":
+        # Обработка изменения пароля админки
+        new_username = request.form.get('admin_username', '').strip()
+        new_password = request.form.get('admin_password', '').strip()
+        password_confirm = request.form.get('admin_password_confirm', '').strip()
+        
+        if new_username:
+            global ADMIN_USERNAME
+            ADMIN_USERNAME = new_username
+        
+        if new_password:
+            if new_password != password_confirm:
+                flash('Пароли не совпадают!', 'error')
+                return redirect(url_for('admin_settings'))
+            if len(new_password) < 4:
+                flash('Пароль должен содержать минимум 4 символа!', 'error')
+                return redirect(url_for('admin_settings'))
+            global ADMIN_PASSWORD
+            ADMIN_PASSWORD = new_password
+            flash('Пароль админки изменен!', 'success')
+        
         # Обновляем настройки заданий
         for task_name, task_data in TASK_SETTINGS.items():
             for key, value in task_data.items():
@@ -192,7 +212,7 @@ def admin_settings():
         flash('Настройки обновлены!', 'success')
         return redirect(url_for('admin_settings'))
     
-    return render_template("admin/settings.html", settings=TASK_SETTINGS)
+    return render_template("admin/settings.html", settings=TASK_SETTINGS, admin_username=ADMIN_USERNAME)
 
 @app.route("/admin/logout")
 def admin_logout():
