@@ -283,3 +283,33 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Share
 .run .zone { width: 160px; height: 10px; background: rgba(0,255,149,.12); border-radius: 999px; position: relative; }
 .run .zone span { position: absolute; left: 60px; right: 20px; top: 0; bottom: 0; background: rgba(0,255,149,.35); border-radius: 999px; }
 @media (max-width: 600px){ .run .controls { grid-auto-flow: row; } .run .zone { width: 100%; } }
+
+/* admin button styling */
+.admin-btn {
+	background: linear-gradient(180deg, rgba(255,165,0,.3), rgba(255,165,0,.1));
+	border: 1px solid #ffa500;
+	color: #ffa500;
+	position: relative;
+	overflow: hidden;
+}
+
+.admin-btn:hover {
+	background: linear-gradient(180deg, rgba(255,165,0,.4), rgba(255,165,0,.2));
+	box-shadow: 0 0 16px rgba(255,165,0,.4);
+	transform: translateY(-2px);
+}
+
+.admin-btn::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+	transition: left 0.5s;
+}
+
+.admin-btn:hover::before {
+	left: 100%;
+}

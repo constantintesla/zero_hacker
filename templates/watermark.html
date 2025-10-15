@@ -1,0 +1,1154 @@
+{% extends 'base.html' %}
+{% block title %}Zero Hacker — Водяные знаки{% endblock %}
+{% block content %}
+<div class="panel watermark-task">
+	<h2>Задание 1: Стеганография и водяные знаки</h2>
+	<p>Загрузите изображение, на которое будет нанесена невидимая водяная метка. Используйте ползунки для проявления скрытой информации.</p>
+	
+	<div class="upload-area" id="uploadArea" style="display: none;">
+		<div class="upload-content">
+			<div class="upload-icon">📁</div>
+			<p>Перетащите изображение сюда или нажмите для выбора</p>
+			<input type="file" id="imageInput" accept="image/*" style="display: none;">
+		</div>
+	</div>
+	
+	<div class="image-container" id="imageContainer" style="display: none;">
+		<div class="main-content">
+			<div class="image-wrapper">
+				<img id="watermarkedImage" src="" alt="Изображение с водяной меткой">
+				<div class="watermark-overlay" id="watermarkOverlay">
+					<div class="watermark-text">ZERO HACKER</div>
+					<div class="watermark-pattern"></div>
+				</div>
+			</div>
+			
+			<div class="hacker-terminal">
+				<div class="terminal-header">
+					<div class="terminal-buttons">
+						<span class="btn-close"></span>
+						<span class="btn-minimize"></span>
+						<span class="btn-maximize"></span>
+					</div>
+					<div class="terminal-title">STEGANALYSIS v2.1.4</div>
+				</div>
+				<div class="terminal-body">
+					<div class="terminal-line" id="terminal-command">
+						<span class="prompt">root@steganography:~$</span>
+						<span class="command">./analyze_image.sh</span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-loading">
+						<span class="output">[INFO] Loading image...</span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-scanning">
+						<span class="output">[INFO] Scanning for hidden data...</span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-warn">
+						<span class="output">[WARN] No watermark detected</span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-adjusting">
+						<span class="output">[INFO] Adjusting filters...</span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-success">
+						<span class="output">[SUCCESS] Watermark revealed!</span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-data">
+						<span class="output">[DATA] Hidden message: <span class="password" id="hiddenPassword">ZERO_HACKER_2024</span></span>
+					</div>
+					<div class="terminal-line hidden" id="terminal-password">
+						<span class="output">[INFO] Password for next task: <span class="password" id="nextTaskPassword">HACK_LEVEL_2</span></span>
+					</div>
+					<div class="terminal-line" id="terminal-cursor">
+						<span class="prompt">root@steganography:~$</span>
+						<span class="cursor">_</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="controls-panel">
+			<h3>Настройки проявления водяной метки:</h3>
+			
+			<div class="slider-group">
+				<label for="brightness">Яркость:</label>
+				<div class="slider-container">
+					<input type="range" id="brightness" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<div class="hot-cold-indicator" id="brightnessIndicator"></div>
+				</div>
+				<span id="brightnessValue">50%</span>
+			</div>
+			
+			<div class="slider-group">
+				<label for="contrast">Контрастность:</label>
+				<div class="slider-container">
+					<input type="range" id="contrast" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<div class="hot-cold-indicator" id="contrastIndicator"></div>
+				</div>
+				<span id="contrastValue">50%</span>
+			</div>
+			
+			<div class="slider-group">
+				<label for="gamma">Гамма-коррекция:</label>
+				<div class="slider-container">
+					<input type="range" id="gamma" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<div class="hot-cold-indicator" id="gammaIndicator"></div>
+				</div>
+				<span id="gammaValue">50%</span>
+			</div>
+			
+			<div class="slider-group">
+				<label for="saturation">Насыщенность:</label>
+				<div class="slider-container">
+					<input type="range" id="saturation" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<div class="hot-cold-indicator" id="saturationIndicator"></div>
+				</div>
+				<span id="saturationValue">50%</span>
+			</div>
+			
+			<div class="slider-group">
+				<label for="hue">Оттенок:</label>
+				<div class="slider-container">
+					<input type="range" id="hue" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<div class="hot-cold-indicator" id="hueIndicator"></div>
+				</div>
+				<span id="hueValue">50%</span>
+			</div>
+		</div>
+	</div>
+	
+	<div class="result-panel" id="resultPanel" style="display: none;">
+		<div class="password-revealed">
+			<h4>🔐 Пароль для следующего задания:</h4>
+			<div class="password-box">
+				<code id="nextPassword" onclick="selectPassword()" title="Нажмите для выделения">HACK_LEVEL_2</code>
+			</div>
+			<p class="copy-hint">💡 Нажмите на пароль для выделения</p>
+		</div>
+		<div class="next-step">
+			<a class="btn" href="{{ url_for('hack_simulation') }}">Перейти к заданию 2</a>
+		</div>
+	</div>
+	
+	<style>
+	.result-panel {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: rgba(0, 0, 0, 0.95);
+		border: 2px solid #00ff95;
+		border-radius: 15px;
+		padding: 30px;
+		box-shadow: 0 0 30px rgba(0, 255, 149, 0.8);
+		z-index: 1000;
+		text-align: center;
+		max-width: 500px;
+		width: 90%;
+	}
+	
+	.password-revealed h4 {
+		color: #00ff95;
+		font-size: 20px;
+		margin-bottom: 20px;
+		text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+	}
+	
+	.password-box {
+		margin: 20px 0;
+	}
+	
+	.password-box code {
+		display: block;
+		background: rgba(0, 255, 149, 0.1);
+		border: 2px solid #00ff95;
+		border-radius: 8px;
+		padding: 15px 20px;
+		font-family: 'Courier New', monospace;
+		font-size: 18px;
+		font-weight: bold;
+		color: #00ff95;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+	}
+	
+	.password-box code:hover {
+		background: rgba(0, 255, 149, 0.2);
+		transform: scale(1.05);
+		box-shadow: 0 0 20px rgba(0, 255, 149, 0.8);
+	}
+	
+	.copy-hint {
+		color: #00ff95;
+		font-size: 14px;
+		margin-top: 10px;
+		opacity: 0.8;
+	}
+	
+	.next-step {
+		margin-top: 25px;
+	}
+	
+	.next-step .btn {
+		background: linear-gradient(135deg, #00ff95, #00cc77);
+		color: #000;
+		padding: 12px 25px;
+		text-decoration: none;
+		border-radius: 8px;
+		font-weight: bold;
+		font-size: 16px;
+		transition: all 0.3s ease;
+		display: inline-block;
+	}
+	
+	.next-step .btn:hover {
+		background: linear-gradient(135deg, #00cc77, #00ff95);
+		transform: translateY(-2px);
+		box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
+	}
+	</style>
+</div>
+
+<script>
+(function(){
+	const uploadArea = document.getElementById('uploadArea');
+	const imageInput = document.getElementById('imageInput');
+	const imageContainer = document.getElementById('imageContainer');
+	const watermarkedImage = document.getElementById('watermarkedImage');
+	const resultPanel = document.getElementById('resultPanel');
+	
+	// Автоматически загружаем изображение по умолчанию при загрузке страницы
+	window.addEventListener('load', () => {
+		loadDefaultImage();
+		// Инициализируем индикаторы как черные
+		initializeIndicators();
+	});
+	
+	function initializeIndicators() {
+		const indicators = ['brightnessIndicator', 'contrastIndicator', 'gammaIndicator', 'saturationIndicator', 'hueIndicator'];
+		indicators.forEach(id => {
+			const indicator = document.getElementById(id);
+			if (indicator) {
+				indicator.className = 'hot-cold-indicator neutral';
+			}
+		});
+	}
+	
+	function loadDefaultImage() {
+		// Загружаем изображение по умолчанию через API
+		fetch('/watermark/default')
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					// Показываем изображение напрямую без обработки
+					watermarkedImage.src = 'data:image/jpeg;base64,' + data.image;
+					imageContainer.style.display = 'block';
+					uploadArea.style.display = 'none';
+					setupSliders();
+				} else {
+					console.error('Error loading default image:', data.error);
+					// Если не удалось загрузить, показываем область загрузки
+					uploadArea.style.display = 'block';
+				}
+			})
+			.catch(error => {
+				console.error('Error loading default image:', error);
+				// Если не удалось загрузить, показываем область загрузки
+				uploadArea.style.display = 'block';
+			});
+	}
+	
+	// Обработка загрузки файла (для ручной загрузки)
+	uploadArea.addEventListener('click', () => imageInput.click());
+	uploadArea.addEventListener('dragover', (e) => {
+		e.preventDefault();
+		uploadArea.classList.add('dragover');
+	});
+	uploadArea.addEventListener('dragleave', () => {
+		uploadArea.classList.remove('dragover');
+	});
+	uploadArea.addEventListener('drop', (e) => {
+		e.preventDefault();
+		uploadArea.classList.remove('dragover');
+		const files = e.dataTransfer.files;
+		if (files.length > 0) {
+			handleFileUpload(files[0]);
+		}
+	});
+	
+	imageInput.addEventListener('change', (e) => {
+		if (e.target.files.length > 0) {
+			handleFileUpload(e.target.files[0]);
+		}
+	});
+	
+	function handleFileUpload(file) {
+		const formData = new FormData();
+		formData.append('image', file);
+		
+		fetch('/watermark', {
+			method: 'POST',
+			body: formData
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.success) {
+				watermarkedImage.src = 'data:image/png;base64,' + data.image;
+				imageContainer.style.display = 'block';
+				uploadArea.style.display = 'none';
+				setupSliders();
+			}
+		})
+		.catch(error => console.error('Error:', error));
+	}
+	
+	function setupSliders() {
+		const sliders = document.querySelectorAll('.slider');
+		sliders.forEach(slider => {
+			const valueSpan = document.getElementById(slider.id + 'Value');
+			
+			slider.addEventListener('input', () => {
+				valueSpan.textContent = slider.value + '%';
+				applyFilters();
+				checkWatermarkReveal();
+			});
+		});
+	}
+	
+	function applyFilters() {
+		const brightness = document.getElementById('brightness').value;
+		const contrast = document.getElementById('contrast').value;
+		const gamma = document.getElementById('gamma').value;
+		const saturation = document.getElementById('saturation').value;
+		const hue = document.getElementById('hue').value;
+		
+		// Применяем CSS фильтры для проявления водяной метки
+		// Используем более агрессивные фильтры для лучшей видимости
+		const brightnessValue = brightness / 100;
+		const contrastValue = contrast / 100;
+		const saturationValue = saturation / 100;
+		const hueValue = hue * 3.6;
+		
+		// Создаем более заметные эффекты
+		const filterValue = `
+			brightness(${brightnessValue}) 
+			contrast(${contrastValue}) 
+			saturate(${saturationValue}) 
+			hue-rotate(${hueValue}deg)
+			sepia(0.1)
+			invert(0.05)
+		`;
+		
+		watermarkedImage.style.filter = filterValue;
+		
+		// Добавляем дополнительные эффекты для проявления водяной метки
+		const watermarkOverlay = document.getElementById('watermarkOverlay');
+		
+		if (brightness >= 60 && contrast >= 70) {
+			watermarkedImage.style.mixBlendMode = 'multiply';
+			watermarkedImage.style.opacity = '0.9';
+			
+			// Показываем оверлей водяной метки
+			watermarkOverlay.style.opacity = '0.8';
+			watermarkOverlay.style.display = 'block';
+		} else {
+			watermarkedImage.style.mixBlendMode = 'normal';
+			watermarkedImage.style.opacity = '1';
+			
+			// Скрываем оверлей
+			watermarkOverlay.style.opacity = '0';
+			watermarkOverlay.style.display = 'none';
+		}
+		
+		// Обновляем терминал в зависимости от прогресса
+		updateTerminalProgress(brightness, contrast, gamma, saturation, hue);
+	}
+	
+	function updateTerminalProgress(brightness, contrast, gamma, saturation, hue) {
+		// Показываем строки терминала постепенно
+		const loading = document.getElementById('terminal-loading');
+		const scanning = document.getElementById('terminal-scanning');
+		const warn = document.getElementById('terminal-warn');
+		const adjusting = document.getElementById('terminal-adjusting');
+		const success = document.getElementById('terminal-success');
+		const data = document.getElementById('terminal-data');
+		const password = document.getElementById('terminal-password');
+		
+		// Всегда показываем загрузку
+		if (loading.classList.contains('hidden')) {
+			loading.classList.remove('hidden');
+			loading.classList.add('typing');
+		}
+		
+		// Показываем сканирование при любом движении ползунков
+		if (brightness > 10 || contrast > 10 || gamma > 10 || saturation > 10 || hue > 10) {
+			if (scanning.classList.contains('hidden')) {
+				scanning.classList.remove('hidden');
+				scanning.classList.add('typing');
+			}
+		}
+		
+		// Показываем предупреждение если значения далеки от целевых
+		const targetBrightness = 60, targetContrast = 70, targetGamma = 50, targetSaturation = 60, targetHue = 40;
+		const tolerance = 5;
+		
+		const brightnessOk = Math.abs(brightness - targetBrightness) <= tolerance;
+		const contrastOk = Math.abs(contrast - targetContrast) <= tolerance;
+		const gammaOk = Math.abs(gamma - targetGamma) <= tolerance;
+		const saturationOk = Math.abs(saturation - targetSaturation) <= tolerance;
+		const hueOk = Math.abs(hue - targetHue) <= tolerance;
+		
+		if (!brightnessOk || !contrastOk || !gammaOk || !saturationOk || !hueOk) {
+			if (warn.classList.contains('hidden')) {
+				warn.classList.remove('hidden');
+				warn.classList.add('typing');
+			}
+		}
+		
+		// Показываем настройку фильтров при приближении к целевым значениям
+		if (brightness > 40 || contrast > 50 || gamma > 30 || saturation > 40 || hue > 20) {
+			if (adjusting.classList.contains('hidden')) {
+				adjusting.classList.remove('hidden');
+				adjusting.classList.add('typing');
+			}
+		}
+		
+		// Показываем успех и данные только при достижении всех целевых значений
+		if (brightnessOk && contrastOk && gammaOk && saturationOk && hueOk) {
+			if (success.classList.contains('hidden')) {
+				success.classList.remove('hidden');
+				success.classList.add('typing');
+			}
+			if (data.classList.contains('hidden')) {
+				data.classList.remove('hidden');
+				data.classList.add('typing');
+			}
+			if (password.classList.contains('hidden')) {
+				password.classList.remove('hidden');
+				password.classList.add('typing');
+			}
+			
+			// Показываем паттерн водяной метки
+			const watermarkPattern = document.querySelector('.watermark-pattern');
+			if (watermarkPattern) {
+				watermarkPattern.style.display = 'block';
+				watermarkPattern.style.opacity = '1';
+			}
+		} else {
+			// Скрываем паттерн если значения неправильные
+			const watermarkPattern = document.querySelector('.watermark-pattern');
+			if (watermarkPattern) {
+				watermarkPattern.style.display = 'none';
+				watermarkPattern.style.opacity = '0';
+			}
+		}
+		
+		// Обновляем индикаторы "горячо-холодно"
+		updateHotColdIndicators(brightness, contrast, gamma, saturation, hue);
+	}
+	
+	function updateHotColdIndicators(brightness, contrast, gamma, saturation, hue) {
+		const targets = { brightness: 60, contrast: 70, gamma: 50, saturation: 60, hue: 40 };
+		const tolerance = 5;
+		
+		// Обновляем каждый индикатор
+		updateIndicator('brightnessIndicator', brightness, targets.brightness, tolerance);
+		updateIndicator('contrastIndicator', contrast, targets.contrast, tolerance);
+		updateIndicator('gammaIndicator', gamma, targets.gamma, tolerance);
+		updateIndicator('saturationIndicator', saturation, targets.saturation, tolerance);
+		updateIndicator('hueIndicator', hue, targets.hue, tolerance);
+	}
+	
+	function updateIndicator(id, current, target, tolerance) {
+		const indicator = document.getElementById(id);
+		if (!indicator) return;
+		
+		const distance = Math.abs(current - target);
+		
+		// Убираем все классы
+		indicator.className = 'hot-cold-indicator';
+		
+		if (distance <= tolerance) {
+			// Идеально - синий с пульсацией
+			indicator.classList.add('perfect');
+		} else if (distance <= tolerance * 2) {
+			// Горячо - зеленый
+			indicator.classList.add('hot');
+		} else if (distance <= tolerance * 4) {
+			// Тепло - оранжевый
+			indicator.classList.add('warm');
+		} else if (distance <= tolerance * 8) {
+			// Холодно - красный
+			indicator.classList.add('cold');
+		} else {
+			// Нейтрально - черный
+			indicator.classList.add('neutral');
+		}
+	}
+	
+	function checkWatermarkReveal() {
+		const brightness = parseInt(document.getElementById('brightness').value);
+		const contrast = parseInt(document.getElementById('contrast').value);
+		const gamma = parseInt(document.getElementById('gamma').value);
+		const saturation = parseInt(document.getElementById('saturation').value);
+		const hue = parseInt(document.getElementById('hue').value);
+		
+		// Проверяем, достигнуты ли правильные значения для проявления водяной метки
+		// Используем диапазон ±5% для более гибкой проверки
+		const targetBrightness = 60, targetContrast = 70, targetGamma = 50, targetSaturation = 60, targetHue = 40;
+		const tolerance = 5;
+		
+		const brightnessOk = Math.abs(brightness - targetBrightness) <= tolerance;
+		const contrastOk = Math.abs(contrast - targetContrast) <= tolerance;
+		const gammaOk = Math.abs(gamma - targetGamma) <= tolerance;
+		const saturationOk = Math.abs(saturation - targetSaturation) <= tolerance;
+		const hueOk = Math.abs(hue - targetHue) <= tolerance;
+		
+		if (brightnessOk && contrastOk && gammaOk && saturationOk && hueOk) {
+			resultPanel.style.display = 'block';
+			// Добавляем анимацию появления
+			resultPanel.style.animation = 'fadeIn 0.5s ease-in';
+			// Показываем пароль для следующего задания
+			showPasswordForNextTask();
+		} else {
+			resultPanel.style.display = 'none';
+		}
+	}
+	
+	function showPasswordForNextTask() {
+		// Показываем пароль для следующего задания
+		const passwordDisplay = document.getElementById('passwordDisplay');
+		if (passwordDisplay) {
+			passwordDisplay.style.display = 'block';
+		}
+	}
+	
+	function copyPassword() {
+		const passwordElement = document.getElementById('nextPassword');
+		const password = passwordElement.textContent;
+		
+		// Пробуем современный API
+		if (navigator.clipboard && window.isSecureContext) {
+			navigator.clipboard.writeText(password).then(() => {
+				showCopySuccess();
+			}).catch(err => {
+				console.error('Ошибка с navigator.clipboard:', err);
+				// Fallback к старому методу
+				fallbackCopyTextToClipboard(password);
+			});
+		} else {
+			// Fallback для старых браузеров
+			fallbackCopyTextToClipboard(password);
+		}
+	}
+	
+	function fallbackCopyTextToClipboard(text) {
+		const textArea = document.createElement("textarea");
+		textArea.value = text;
+		
+		// Избегаем прокрутки к элементу
+		textArea.style.top = "0";
+		textArea.style.left = "0";
+		textArea.style.position = "fixed";
+		textArea.style.opacity = "0";
+		
+		document.body.appendChild(textArea);
+		textArea.focus();
+		textArea.select();
+		
+		try {
+			const successful = document.execCommand('copy');
+			if (successful) {
+				showCopySuccess();
+			} else {
+				showCopyError();
+			}
+		} catch (err) {
+			console.error('Ошибка с execCommand:', err);
+			showCopyError();
+		}
+		
+		document.body.removeChild(textArea);
+	}
+	
+	function showCopySuccess() {
+		const button = document.querySelector('.btn-copy');
+		const originalText = button.textContent;
+		button.textContent = 'Скопировано!';
+		button.style.background = '#00ff95';
+		button.style.color = '#000';
+		
+		setTimeout(() => {
+			button.textContent = originalText;
+			button.style.background = '';
+			button.style.color = '';
+		}, 2000);
+	}
+	
+	function showCopyError() {
+		alert('Не удалось скопировать пароль. Пароль: ' + document.getElementById('nextPassword').textContent);
+	}
+	
+	function selectPassword() {
+		const passwordElement = document.getElementById('nextPassword');
+		
+		// Создаем временный input для выделения
+		const tempInput = document.createElement('input');
+		tempInput.value = passwordElement.textContent;
+		tempInput.style.position = 'fixed';
+		tempInput.style.opacity = '0';
+		tempInput.style.left = '-9999px';
+		
+		document.body.appendChild(tempInput);
+		tempInput.select();
+		tempInput.setSelectionRange(0, 99999); // Для мобильных устройств
+		
+		// Показываем подсказку
+		passwordElement.style.background = 'rgba(0, 255, 149, 0.2)';
+		passwordElement.style.border = '1px solid #00ff95';
+		
+		setTimeout(() => {
+			passwordElement.style.background = '';
+			passwordElement.style.border = '';
+			document.body.removeChild(tempInput);
+		}, 2000);
+	}
+})();
+</script>
+
+<style>
+/* Анимации для водяной метки */
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(20px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes watermarkGlow {
+	0%, 100% { box-shadow: 0 0 20px rgba(0,255,149,0.3); }
+	50% { box-shadow: 0 0 30px rgba(0,255,149,0.6); }
+}
+
+.watermark-revealed {
+	animation: fadeIn 0.8s ease-out;
+}
+
+.watermark-pattern {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 16px 0;
+	opacity: 0.7;
+}
+
+.pattern-line {
+	height: 2px;
+	background: linear-gradient(90deg, transparent, var(--green), transparent);
+	animation: watermarkGlow 2s ease-in-out infinite;
+}
+
+.pattern-line:nth-child(2) {
+	animation-delay: 0.5s;
+}
+
+.pattern-line:nth-child(3) {
+	animation-delay: 1s;
+}
+
+.result-panel {
+	background: rgba(0, 255, 149, 0.1);
+	border: 2px solid var(--green);
+	border-radius: 12px;
+	padding: 24px;
+	margin-top: 24px;
+	box-shadow: 0 0 32px rgba(0,255,149,0.2);
+}
+
+.result-panel h3 {
+	color: var(--green);
+	margin: 0 0 16px 0;
+	text-align: center;
+	letter-spacing: 2px;
+}
+
+.watermark-revealed p {
+	margin: 8px 0;
+	text-align: center;
+}
+
+#hiddenMessage {
+	color: var(--green);
+	font-size: 18px;
+	text-shadow: 0 0 10px rgba(0,255,149,0.5);
+	animation: watermarkGlow 1.5s ease-in-out infinite;
+}
+
+.next-step {
+	text-align: center;
+	margin-top: 20px;
+}
+
+/* Улучшенные стили для ползунков */
+.slider-group {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+	padding: 12px;
+	background: rgba(0, 20, 10, 0.3);
+	border-radius: 8px;
+	border: 1px solid var(--dim);
+}
+
+.slider-group label {
+	font-size: 14px;
+	color: var(--text);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.slider {
+	-webkit-appearance: none;
+	appearance: none;
+	height: 6px;
+	background: linear-gradient(90deg, rgba(0,255,149,0.3), rgba(0,255,149,0.8));
+	border-radius: 3px;
+	outline: none;
+	transition: all 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	background: var(--green);
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 12px rgba(0,255,149,0.6);
+	transition: all 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+	transform: scale(1.2);
+	box-shadow: 0 0 16px rgba(0,255,149,0.8);
+}
+
+.slider::-moz-range-thumb {
+	width: 20px;
+	height: 20px;
+	background: var(--green);
+	border-radius: 50%;
+	cursor: pointer;
+	border: none;
+	box-shadow: 0 0 12px rgba(0,255,149,0.6);
+}
+
+.slider-group span {
+	color: var(--green);
+	font-weight: bold;
+	min-width: 40px;
+	text-align: center;
+}
+
+/* Стили для секции тестового изображения */
+.sample-image-section {
+	margin-top: 20px;
+	padding: 16px;
+	background: rgba(0, 255, 149, 0.05);
+	border: 1px solid rgba(0, 255, 149, 0.2);
+	border-radius: 8px;
+	text-align: center;
+}
+
+.sample-image-section p {
+	margin: 0 0 12px 0;
+	color: var(--text);
+	font-size: 14px;
+	opacity: 0.8;
+}
+
+.sample-image-section .btn {
+	background: linear-gradient(180deg, rgba(0,255,149,.2), rgba(0,255,149,.05));
+	border: 1px solid var(--green);
+	color: var(--green);
+	padding: 8px 16px;
+	font-size: 14px;
+}
+
+.sample-image-section .btn:hover {
+	background: linear-gradient(180deg, rgba(0,255,149,.3), rgba(0,255,149,.1));
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0,255,149,0.25);
+}
+
+/* Стили для оверлея водяной метки */
+.image-wrapper {
+	position: relative;
+	display: inline-block;
+}
+
+.watermark-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.5s ease;
+	display: none;
+}
+
+.watermark-text {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: var(--green);
+	font-size: 24px;
+	font-weight: bold;
+	text-shadow: 0 0 10px rgba(0,255,149,0.8);
+	letter-spacing: 3px;
+	animation: watermarkGlow 2s ease-in-out infinite;
+}
+
+.watermark-pattern {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: repeating-linear-gradient(
+		45deg,
+		transparent,
+		transparent 20px,
+		rgba(0,255,149,0.1) 20px,
+		rgba(0,255,149,0.1) 40px
+	);
+	animation: watermarkPattern 3s linear infinite;
+}
+
+@keyframes watermarkPattern {
+	0% { transform: translateX(0); }
+	100% { transform: translateX(40px); }
+}
+
+/* Стили для основного контента */
+.main-content {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	align-items: start;
+}
+
+/* Стили для хакерского терминала */
+.hacker-terminal {
+	background: #000;
+	border: 1px solid #333;
+	border-radius: 8px;
+	box-shadow: 0 0 20px rgba(0,255,149,0.3);
+	font-family: 'Courier New', monospace;
+	overflow: hidden;
+}
+
+.terminal-header {
+	background: #1a1a1a;
+	padding: 8px 12px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #333;
+}
+
+.terminal-buttons {
+	display: flex;
+	gap: 6px;
+}
+
+.terminal-buttons span {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+}
+
+.btn-close { background: #ff5f56; }
+.btn-minimize { background: #ffbd2e; }
+.btn-maximize { background: #27ca3f; }
+
+.terminal-title {
+	color: #00ff95;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.terminal-body {
+	padding: 12px;
+	background: #000;
+	min-height: 200px;
+}
+
+.terminal-line {
+	margin-bottom: 4px;
+	font-size: 14px;
+	line-height: 1.4;
+	opacity: 1;
+	transition: opacity 0.5s ease;
+}
+
+.terminal-line.hidden {
+	opacity: 0;
+	display: none;
+}
+
+.terminal-line.typing {
+	animation: typewriter 0.5s ease-in;
+}
+
+@keyframes typewriter {
+	from { 
+		opacity: 0; 
+		transform: translateX(-10px);
+	}
+	to { 
+		opacity: 1; 
+		transform: translateX(0);
+	}
+}
+
+.prompt {
+	color: #00ff95;
+	font-weight: bold;
+}
+
+.command {
+	color: #fff;
+}
+
+.output {
+	color: #ccc;
+}
+
+.output.success {
+	color: #00ff95;
+}
+
+.output.warn {
+	color: #ffbd2e;
+}
+
+.output.error {
+	color: #ff5f56;
+}
+
+.password {
+	color: #00ff95;
+	font-weight: bold;
+	text-shadow: 0 0 8px rgba(0,255,149,0.5);
+	animation: passwordGlow 2s ease-in-out infinite;
+}
+
+.cursor {
+	animation: blink 1s infinite;
+	color: #00ff95;
+}
+
+@keyframes blink {
+	0%, 50% { opacity: 1; }
+	51%, 100% { opacity: 0; }
+}
+
+@keyframes passwordGlow {
+	0%, 100% { text-shadow: 0 0 8px rgba(0,255,149,0.5); }
+	50% { text-shadow: 0 0 16px rgba(0,255,149,0.8); }
+}
+
+/* Стили для пароля */
+.password-revealed {
+	margin-top: 20px;
+	padding: 16px;
+	background: rgba(0, 255, 149, 0.1);
+	border: 1px solid var(--green);
+	border-radius: 8px;
+}
+
+.password-revealed h4 {
+	color: var(--green);
+	margin: 0 0 12px 0;
+	text-align: center;
+}
+
+.password-box {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	background: rgba(0, 0, 0, 0.8);
+	padding: 12px;
+	border-radius: 6px;
+	border: 1px solid var(--dim);
+}
+
+.password-box code {
+	color: var(--green);
+	font-family: 'Courier New', monospace;
+	font-size: 16px;
+	font-weight: bold;
+	letter-spacing: 1px;
+	text-shadow: 0 0 8px rgba(0,255,149,0.5);
+	flex: 1;
+	cursor: pointer;
+	user-select: all;
+	-webkit-user-select: all;
+	-moz-user-select: all;
+	-ms-user-select: all;
+	padding: 8px;
+	border-radius: 4px;
+	transition: all 0.3s ease;
+}
+
+.password-box code:hover {
+	background: rgba(0, 255, 149, 0.1);
+	transform: scale(1.02);
+}
+
+.btn-copy {
+	background: linear-gradient(180deg, rgba(0,255,149,.3), rgba(0,255,149,.1));
+	border: 1px solid var(--green);
+	color: var(--green);
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	transition: all 0.3s ease;
+}
+
+.btn-copy:hover {
+	background: linear-gradient(180deg, rgba(0,255,149,.4), rgba(0,255,149,.2));
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0,255,149,0.25);
+}
+
+.copy-hint {
+	font-size: 12px;
+	color: var(--dim);
+	margin-top: 8px;
+	text-align: center;
+	opacity: 0.7;
+}
+
+/* Стили для индикаторов "горячо-холодно" */
+.slider-container {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.hot-cold-indicator {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	transition: all 0.3s ease;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	position: relative;
+	background: #333; /* Черный по умолчанию */
+}
+
+.hot-cold-indicator::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.8);
+	transition: all 0.3s ease;
+}
+
+.hot-cold-indicator.cold {
+	background: linear-gradient(135deg, #ff0000, #ff4444);
+	box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.hot-cold-indicator.warm {
+	background: linear-gradient(135deg, #ff8800, #ffaa00);
+	box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+}
+
+.hot-cold-indicator.hot {
+	background: linear-gradient(135deg, #00ff00, #44ff44);
+	box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.hot-cold-indicator.perfect {
+	background: linear-gradient(135deg, #0088ff, #00aaff);
+	box-shadow: 0 0 20px rgba(0, 136, 255, 0.8);
+	animation: pulse 1s infinite;
+}
+
+.hot-cold-indicator.neutral {
+	background: #333;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes pulse {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.1); }
+	100% { transform: scale(1); }
+}
+
+/* Стили для watermark-pattern */
+.watermark-pattern {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 10;
+	background: repeating-linear-gradient(
+		45deg,
+		transparent,
+		transparent 10px,
+		rgba(0, 255, 149, 0.1) 10px,
+		rgba(0, 255, 149, 0.1) 20px
+	);
+	animation: watermarkPulse 2s ease-in-out infinite;
+	display: none; /* Скрыт по умолчанию */
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+/* Убеждаемся, что паттерн ограничен контейнером изображения */
+.image-wrapper {
+	position: relative;
+	overflow: hidden;
+}
+
+@keyframes watermarkPulse {
+	0%, 100% { opacity: 0.3; }
+	50% { opacity: 0.7; }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+	.main-content {
+		grid-template-columns: 1fr;
+	}
+	
+	.hacker-terminal {
+		order: -1;
+	}
+	
+	.password-box {
+		flex-direction: column;
+		text-align: center;
+	}
+}
+</style>
+{% endblock %}

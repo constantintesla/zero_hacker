@@ -5,12 +5,15 @@
 	<h1 class="glitch" data-text="ZERO HACKER">ZERO HACKER</h1>
 	<p class="type" id="hero-type"></p>
 	<div class="hero-cta">
-		<a class="btn" href="{{ url_for('run_simple') }}">Старт</a>
+		<a class="btn" href="{{ url_for('watermark_task') }}">🎯 Задание 1: Водяные знаки</a>
+		<a class="btn" href="{{ url_for('hack_simulation') }}">🚀 Задание 2: Хакерская атака</a>
+		<a class="btn" href="{{ url_for('decode_ip') }}">🔐 Задание 3: Декодирование IP</a>
+		<a class="btn admin-btn" href="{{ url_for('admin_login') }}">⚙️ Админ панель</a>
 	</div>
 </div>
 <script>
 (function(){
-	const lines = ["Взломай иллюзию.", "Один экран — три шага.", "Следуй за золотом."]; const el=document.getElementById('hero-type'); let i=0,j=0,del=false; function t(){ if(!del){ el.textContent=lines[i].slice(0,++j); if(j===lines[i].length){ del=true; setTimeout(t,1200); return; } } else { el.textContent=lines[i].slice(0,--j); if(j===0){ del=false; i=(i+1)%lines.length; } } setTimeout(t, del?35:45); } t();
+	const lines = ["Стеганография и водяные знаки.", "Симуляция хакерской атаки.", "Декодирование зашифрованного IP."]; const el=document.getElementById('hero-type'); let i=0,j=0,del=false; function t(){ if(!del){ el.textContent=lines[i].slice(0,++j); if(j===lines[i].length){ del=true; setTimeout(t,1200); return; } } else { el.textContent=lines[i].slice(0,--j); if(j===0){ del=false; i=(i+1)%lines.length; } } setTimeout(t, del?35:45); } t();
 })();
 </script>
 {% endblock %}

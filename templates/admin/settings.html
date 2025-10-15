@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% block title %}Zero Hacker — Настройки заданий{% endblock %}
+{% block content %}
+<div class="admin-settings">
+	<header class="admin-header">
+		<h1>⚙️ Настройки заданий</h1>
+		<div class="admin-nav">
+			<a href="{{ url_for('admin_dashboard') }}" class="btn">Дашборд</a>
+			<a href="{{ url_for('admin_logout') }}" class="btn">Выйти</a>
+		</div>
+	</header>
+	
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
+			{% for category, message in messages %}
+				<div class="alert alert-{{ category }}">{{ message }}</div>
+			{% endfor %}
+		{% endif %}
+	{% endwith %}
+	
+	<form method="POST" class="settings-form">
+		<div class="settings-grid">
+			<!-- Настройки водяных знаков -->
+			<div class="settings-section">
+				<h3>🎨 Задание 1: Водяные знаки</h3>
+				
+				<div class="setting-group">
+					<label for="watermark_image">Изображение по умолчанию:</label>
+					<input type="file" id="watermark_image" name="watermark_image" accept="image/*" class="input">
+					<button type="button" class="btn" onclick="uploadDefaultImage()">Загрузить как изображение по умолчанию</button>
+					<p class="hint">Текущее изображение: vova_watermarked.jpg</p>
+				</div>
+				<div class="setting-group">
+					<label class="checkbox-label">
+						<input type="checkbox" name="watermark_enabled" value="true" {{ 'checked' if settings.watermark.enabled else '' }}>
+						<span class="checkmark"></span>
+						Включить задание
+					</label>
+				</div>
+				
+				<div class="setting-group">
+					<label for="watermark_required_brightness">Требуемая яркость (%):</label>
+					<input type="number" id="watermark_required_brightness" name="watermark_required_brightness" 
+						   value="{{ settings.watermark.required_brightness }}" min="0" max="100" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="watermark_required_contrast">Требуемый контраст (%):</label>
+					<input type="number" id="watermark_required_contrast" name="watermark_required_contrast" 
+						   value="{{ settings.watermark.required_contrast }}" min="0" max="100" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="watermark_required_gamma">Требуемая гамма (%):</label>
+					<input type="number" id="watermark_required_gamma" name="watermark_required_gamma" 
+						   value="{{ settings.watermark.required_gamma }}" min="0" max="100" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="watermark_required_saturation">Требуемая насыщенность (%):</label>
+					<input type="number" id="watermark_required_saturation" name="watermark_required_saturation" 
+						   value="{{ settings.watermark.required_saturation }}" min="0" max="100" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="watermark_required_hue">Требуемый оттенок (%):</label>
+					<input type="number" id="watermark_required_hue" name="watermark_required_hue" 
+						   value="{{ settings.watermark.required_hue }}" min="0" max="100" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="watermark_hidden_message">Скрытое сообщение:</label>
+					<input type="text" id="watermark_hidden_message" name="watermark_hidden_message" 
+						   value="{{ settings.watermark.hidden_message }}" class="input">
+				</div>
+			</div>
+			
+			<!-- Настройки хакерской симуляции -->
+			<div class="settings-section">
+				<h3>💻 Задание 2: Хакерская атака</h3>
+				<div class="setting-group">
+					<label class="checkbox-label">
+						<input type="checkbox" name="hack_simulation_enabled" value="true" {{ 'checked' if settings.hack_simulation.enabled else '' }}>
+						<span class="checkmark"></span>
+						Включить задание
+					</label>
+				</div>
+				
+				<div class="setting-group">
+					<label for="hack_simulation_duration_minutes">Длительность (минуты):</label>
+					<input type="number" id="hack_simulation_duration_minutes" name="hack_simulation_duration_minutes" 
+						   value="{{ settings.hack_simulation.duration_minutes }}" min="1" max="60" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label>Фазы прогресса:</label>
+					<div class="phases-list">
+						{% for phase in settings.hack_simulation.progress_phases %}
+						<div class="phase-item">
+							<input type="text" name="hack_simulation_progress_phases_{{ loop.index0 }}" value="{{ phase }}" class="input phase-input">
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				
+            <div class="setting-group">
+                <label>Пароль для доступа:</label>
+                <input type="text" value="{{ settings.watermark.password_for_next }}" readonly class="input readonly">
+                <small class="help-text">Пароль берется из первого задания</small>
+            </div>
+            
+            <div class="setting-group">
+                <label>Зашифрованный IP:</label>
+                <input type="text" name="hack_simulation_encrypted_ip" value="{{ settings.hack_simulation.encrypted_ip }}" class="input">
+                <small class="help-text">Зашифрованный IP адрес для второго задания</small>
+            </div>
+            
+            <div class="setting-group">
+                <label>Реальный IP:</label>
+                <input type="text" name="hack_simulation_real_ip" value="{{ settings.hack_simulation.real_ip }}" class="input">
+                <small class="help-text">Реальный IP адрес для декодирования</small>
+            </div>
+            
+            <div class="setting-group">
+                <label>Пароль для третьего задания:</label>
+                <input type="text" value="HACK_COMPLETE" readonly class="input readonly">
+                <small class="help-text">Пароль для доступа к декодированию IP</small>
+            </div>
+			</div>
+			
+			<!-- Настройки декодирования IP -->
+			<div class="settings-section">
+				<h3>🔐 Задание 3: Декодирование IP</h3>
+				<div class="setting-group">
+					<label class="checkbox-label">
+						<input type="checkbox" name="ip_decode_enabled" value="true" {{ 'checked' if settings.ip_decode.enabled else '' }}>
+						<span class="checkmark"></span>
+						Включить задание
+					</label>
+				</div>
+				
+				<div class="setting-group">
+					<label for="ip_decode_encrypted_ip">Зашифрованный IP:</label>
+					<input type="text" id="ip_decode_encrypted_ip" name="ip_decode_encrypted_ip" 
+						   value="{{ settings.ip_decode.encrypted_ip }}" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="ip_decode_real_ip">Реальный IP:</label>
+					<input type="text" id="ip_decode_real_ip" name="ip_decode_real_ip" 
+						   value="{{ settings.ip_decode.real_ip }}" class="input">
+				</div>
+				
+				<div class="setting-group">
+					<label for="ip_decode_decoder_steps">Количество шагов декодирования:</label>
+					<input type="number" id="ip_decode_decoder_steps" name="ip_decode_decoder_steps" 
+						   value="{{ settings.ip_decode.decoder_steps }}" min="1" max="10" class="input">
+				</div>
+			</div>
+		</div>
+		
+		<div class="form-actions">
+			<button type="submit" class="btn btn-primary">Сохранить настройки</button>
+			<button type="button" class="btn btn-secondary" onclick="resetToDefaults()">Сбросить к умолчанию</button>
+		</div>
+	</form>
+</div>
+
+<style>
+.admin-settings {
+	padding: 24px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.admin-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 32px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid var(--dim);
+}
+
+.admin-header h1 {
+	color: var(--green);
+	margin: 0;
+	letter-spacing: 2px;
+}
+
+.admin-nav {
+	display: flex;
+	gap: 12px;
+}
+
+.alert {
+	padding: 16px;
+	border-radius: 8px;
+	margin-bottom: 24px;
+	font-weight: bold;
+}
+
+.alert-error {
+	background: rgba(255, 107, 107, 0.1);
+	border: 1px solid #ff6b6b;
+	color: #ff6b6b;
+}
+
+.alert-success {
+	background: rgba(0, 255, 149, 0.1);
+	border: 1px solid var(--green);
+	color: var(--green);
+}
+
+.settings-form {
+	background: rgba(0, 20, 10, 0.6);
+	border: 1px solid var(--dim);
+	border-radius: 12px;
+	padding: 32px;
+	box-shadow: 0 0 24px rgba(0,255,149,0.08);
+}
+
+.settings-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+	gap: 32px;
+	margin-bottom: 32px;
+}
+
+.settings-section {
+	background: rgba(0, 20, 10, 0.4);
+	border: 1px solid var(--dim);
+	border-radius: 8px;
+	padding: 24px;
+}
+
+.settings-section h3 {
+	color: var(--green);
+	margin: 0 0 20px 0;
+	padding-bottom: 12px;
+	border-bottom: 1px solid rgba(0,255,149,0.2);
+}
+
+.setting-group {
+	margin-bottom: 20px;
+}
+
+.setting-group label {
+	display: block;
+	margin-bottom: 8px;
+	color: var(--text);
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.input {
+	width: 100%;
+	background: rgba(0, 20, 10, 0.6);
+	border: 1px solid var(--dim);
+	color: var(--text);
+	padding: 12px 16px;
+	border-radius: 6px;
+	font-family: 'Share Tech Mono', monospace;
+	transition: all 0.3s ease;
+}
+
+.input:focus {
+	outline: none;
+	border-color: var(--green);
+	box-shadow: 0 0 12px rgba(0,255,149,0.25);
+}
+
+.checkbox-label {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 16px;
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+	display: none;
+}
+
+.checkmark {
+	width: 20px;
+	height: 20px;
+	background: rgba(0, 20, 10, 0.6);
+	border: 1px solid var(--dim);
+	border-radius: 4px;
+	margin-right: 12px;
+	position: relative;
+	transition: all 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+	background: var(--green);
+	border-color: var(--green);
+	box-shadow: 0 0 12px rgba(0,255,149,0.5);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+	content: '✓';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #000;
+	font-weight: bold;
+}
+
+.phases-list {
+	display: grid;
+	gap: 8px;
+}
+
+.phase-item {
+	display: flex;
+	align-items: center;
+}
+
+.phase-input {
+	margin: 0;
+}
+
+.form-actions {
+	display: flex;
+	gap: 16px;
+	justify-content: center;
+	padding-top: 24px;
+	border-top: 1px solid var(--dim);
+}
+
+.btn-primary {
+	background: linear-gradient(180deg, rgba(0,255,149,.3), rgba(0,255,149,.1));
+	border: 1px solid var(--green);
+	color: var(--green);
+	padding: 12px 24px;
+	font-weight: bold;
+}
+
+.btn-secondary {
+	background: rgba(0, 20, 10, 0.6);
+	border: 1px solid var(--dim);
+	color: var(--text);
+	padding: 12px 24px;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 16px rgba(0,255,149,0.25);
+}
+
+@media (max-width: 768px) {
+	.admin-header {
+		flex-direction: column;
+		gap: 16px;
+		text-align: center;
+	}
+	
+	.settings-grid {
+		grid-template-columns: 1fr;
+	}
+	
+	.form-actions {
+		flex-direction: column;
+	}
+}
+</style>
+
+<script>
+function resetToDefaults() {
+	if (confirm('Вы уверены, что хотите сбросить все настройки к значениям по умолчанию?')) {
+		// Сброс значений к умолчанию
+		document.getElementById('watermark_required_brightness').value = 60;
+		document.getElementById('watermark_required_contrast').value = 70;
+		document.getElementById('watermark_required_gamma').value = 50;
+		document.getElementById('watermark_required_saturation').value = 60;
+		document.getElementById('watermark_required_hue').value = 40;
+		document.getElementById('watermark_hidden_message').value = 'ZERO_HACKER_2024';
+		
+		document.getElementById('hack_simulation_duration_minutes').value = 20;
+		
+		document.getElementById('ip_decode_encrypted_ip').value = '4A.3B.2C.1D';
+		document.getElementById('ip_decode_real_ip').value = '192.168.1.100';
+		document.getElementById('ip_decode_decoder_steps').value = 3;
+	}
+}
+
+function uploadDefaultImage() {
+	const fileInput = document.getElementById('watermark_image');
+	if (fileInput.files.length === 0) {
+		alert('Пожалуйста, выберите изображение');
+		return;
+	}
+	
+	const file = fileInput.files[0];
+	const formData = new FormData();
+	formData.append('image', file);
+	
+	fetch('/admin/upload-watermark-image', {
+		method: 'POST',
+		body: formData
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.success) {
+			alert('Изображение успешно загружено!');
+			location.reload();
+		} else {
+			alert('Ошибка при загрузке изображения: ' + data.error);
+		}
+	})
+	.catch(error => {
+		alert('Ошибка при загрузке изображения: ' + error);
+	});
+	}
+	
+	.input.readonly {
+		background: #333;
+		color: #999;
+		cursor: not-allowed;
+	}
+	
+	.help-text {
+		font-size: 12px;
+		color: #666;
+		margin-top: 5px;
+	}
+</script>
+{% endblock %}

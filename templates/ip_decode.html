@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Декодирование IP - Zero Hacker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='matrix.css') }}">
+    <style>
+        .decode-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            padding: 20px;
+        }
+        
+        .decode-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .decode-header h1 {
+            color: #00ff95;
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(0, 255, 149, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .decode-status {
+            color: #ff0000;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .main-decode-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .matrix-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .matrix-header {
+            color: #00ff95;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .matrix-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.05), rgba(0, 255, 149, 0.02));
+            border: 2px solid rgba(0, 255, 149, 0.3);
+            border-radius: 15px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 149, 0.2),
+                inset 0 0 20px rgba(0, 255, 149, 0.1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .matrix-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 149, 0.1), transparent);
+            animation: matrixScan 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .matrix-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 149, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 149, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(0, 255, 149, 0.05) 0%, transparent 50%);
+            animation: matrixGlow 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        @keyframes matrixGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes matrixScan {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+        
+        .matrix-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .matrix-cell {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.1), rgba(0, 255, 149, 0.05));
+            border: 2px solid #00ff95;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff95;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 255, 149, 0.2);
+            overflow: hidden;
+        }
+        
+        .matrix-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .matrix-cell:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.3), rgba(0, 255, 149, 0.2));
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 149, 0.6);
+            border-color: #00ff95;
+        }
+        
+        .matrix-cell:hover::before {
+            left: 100%;
+        }
+        
+        .matrix-cell.selected {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.4), rgba(0, 255, 149, 0.3));
+            border-color: #00ff95;
+            box-shadow: 0 0 25px rgba(0, 255, 149, 0.9);
+            transform: scale(1.1);
+            animation: selectedPulse 1.5s ease-in-out infinite;
+        }
+        
+        .matrix-cell.decoded {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.6), rgba(0, 255, 149, 0.4));
+            border-color: #00ff95;
+            animation: decodedSuccess 2s ease-in-out;
+            transform: scale(1.05);
+        }
+        
+        @keyframes selectedPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0, 255, 149, 0.8);
+                transform: scale(1.1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(0, 255, 149, 1);
+                transform: scale(1.15);
+            }
+        }
+        
+        @keyframes decodedSuccess {
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+            }
+            50% { 
+                transform: scale(1.2);
+                box-shadow: 0 0 40px rgba(0, 255, 149, 1);
+            }
+            100% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(0, 255, 149, 0.8);
+            }
+        }
+        
+        .matrix-separator {
+            font-size: 28px;
+            color: #00ff95;
+            font-weight: bold;
+            margin: 0 8px;
+            text-shadow: 0 0 10px rgba(0, 255, 149, 0.6);
+            animation: separatorPulse 2s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .matrix-separator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(0, 255, 149, 0.3), transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: separatorGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes separatorPulse {
+            0%, 100% { 
+                transform: scale(1);
+                text-shadow: 0 0 10px rgba(0, 255, 149, 0.6);
+            }
+            50% { 
+                transform: scale(1.2);
+                text-shadow: 0 0 20px rgba(0, 255, 149, 1);
+            }
+        }
+        
+        @keyframes separatorGlow {
+            0%, 100% { 
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+        }
+        
+        .matrix-instructions {
+            text-align: center;
+            color: #00ff95;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .matrix-instructions p {
+            margin: 5px 0;
+        }
+        
+        .rules-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 255, 149, 0.05);
+            border: 1px solid rgba(0, 255, 149, 0.3);
+            border-radius: 8px;
+        }
+        
+        .rules-section h4 {
+            color: #00ff95;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .rules-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .rules-list li {
+            color: #00ff95;
+            font-size: 14px;
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: rgba(0, 255, 149, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid #00ff95;
+        }
+        
+        .decoder-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+        }
+        
+        .decoder-header {
+            color: #00ff95;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .decoder-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .decoder-cell {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.1), rgba(0, 255, 149, 0.05));
+            border: 2px solid #00ff95;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff95;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0, 255, 149, 0.2);
+            overflow: hidden;
+        }
+        
+        .decoder-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .decoder-cell:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.3), rgba(0, 255, 149, 0.2));
+            transform: scale(1.1) translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 255, 149, 0.6);
+            border-color: #00ff95;
+        }
+        
+        .decoder-cell:hover::before {
+            left: 100%;
+        }
+        
+        .decoder-cell.selected {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.4), rgba(0, 255, 149, 0.3));
+            border-color: #00ff95;
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.9);
+            transform: scale(1.15);
+            animation: decoderSelected 1.2s ease-in-out infinite;
+        }
+        
+        .decoder-cell.correct {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.6), rgba(0, 255, 149, 0.4));
+            border-color: #00ff95;
+            animation: decoderCorrect 1.5s ease-in-out;
+            transform: scale(1.1);
+        }
+        
+        .decoder-cell.highlighted {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.4), rgba(0, 255, 149, 0.3)) !important;
+            border-color: #00ff95 !important;
+            box-shadow: 0 0 15px rgba(0, 255, 149, 0.8) !important;
+            animation: highlightedPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes decoderSelected {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(0, 255, 149, 0.8);
+                transform: scale(1.15);
+            }
+            50% { 
+                box-shadow: 0 0 25px rgba(0, 255, 149, 1);
+                transform: scale(1.2);
+            }
+        }
+        
+        @keyframes decoderCorrect {
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+            }
+            50% { 
+                transform: scale(1.3);
+                box-shadow: 0 0 30px rgba(0, 255, 149, 1);
+            }
+            100% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(0, 255, 149, 0.8);
+            }
+        }
+        
+        @keyframes highlightedPulse {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(0, 255, 149, 0.8);
+            }
+            50% { 
+                box-shadow: 0 0 25px rgba(0, 255, 149, 1);
+            }
+        }
+        
+        .decoder-status {
+            text-align: center;
+            color: #00ff95;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        
+        .result-section {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff95;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 149, 0.5);
+            margin: 20px auto;
+            text-align: center;
+            max-width: 800px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .result-message {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .result-message.success {
+            color: #00ff95;
+        }
+        
+        .result-message.error {
+            color: #ff0000;
+        }
+        
+        .real-ip-display {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff95;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+        }
+        
+        .ip-result {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.1), rgba(0, 255, 149, 0.05));
+            border: 2px solid #00ff95;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .ip-label {
+            color: #00ff95;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 0 5px rgba(0, 255, 149, 0.5);
+        }
+        
+        .ip-address {
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff95;
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 149, 0.8);
+            animation: ipGlow 2s ease-in-out infinite alternate;
+            background: rgba(0, 255, 149, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 149, 0.3);
+        }
+        
+        .ip-separator {
+            font-size: 24px;
+            color: #00ff95;
+            margin: 15px 0;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        .url-link {
+            margin: 15px 0;
+        }
+        
+        .url-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            color: #000;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 149, 0.4);
+            border: 2px solid #00ff95;
+        }
+        
+        .url-button:hover {
+            background: linear-gradient(135deg, #00cc77, #00ff95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 149, 0.6);
+            color: #000;
+        }
+        
+        @keyframes ipGlow {
+            from { 
+                text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+                box-shadow: 0 0 10px rgba(0, 255, 149, 0.3);
+            }
+            to { 
+                text-shadow: 0 0 20px rgba(0, 255, 149, 1);
+                box-shadow: 0 0 20px rgba(0, 255, 149, 0.6);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .hint-section {
+            background: linear-gradient(135deg, rgba(0, 255, 149, 0.1), rgba(0, 255, 149, 0.05));
+            border: 1px solid #00ff95;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            animation: hintSlideIn 0.5s ease-out;
+        }
+        
+        .hint-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hint-icon {
+            font-size: 20px;
+            animation: hintPulse 2s ease-in-out infinite;
+        }
+        
+        .hint-text {
+            color: #00ff95;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .progress-indicator {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 255, 149, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff95, #00cc77);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+        }
+        
+        .progress-text {
+            color: #00ff95;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        @keyframes hintSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes hintPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .ip-character {
+            display: inline-block;
+            transition: all 0.5s ease;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(0, 255, 149, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 255, 149, 0.8), 0 0 30px rgba(0, 255, 149, 0.3); }
+        }
+        
+        .controls-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+        }
+        
+        .controls-header {
+            color: #00ff95;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .slider-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 20, 10, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 149, 0.2);
+        }
+        
+        .slider-group label {
+            display: block;
+            color: #00ff95;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: linear-gradient(90deg, rgba(0,255,149,0.3), rgba(0,255,149,0.8));
+            border-radius: 4px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #00ff95;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 149, 0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.8);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #00ff95;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 255, 149, 0.6);
+        }
+        
+        .slider-value {
+            color: #00ff95;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            background: rgba(0, 255, 149, 0.1);
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 255, 149, 0.3);
+        }
+        
+        .hot-cold-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            background: #333;
+        }
+        
+        .hot-cold-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .hot-cold-indicator.cold {
+            background: linear-gradient(135deg, #ff0000, #ff4444);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .hot-cold-indicator.warm {
+            background: linear-gradient(135deg, #ff8800, #ffaa00);
+            box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+        }
+        
+        .hot-cold-indicator.hot {
+            background: linear-gradient(135deg, #00ff00, #44ff44);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        
+        .hot-cold-indicator.perfect {
+            background: linear-gradient(135deg, #0088ff, #00aaff);
+            box-shadow: 0 0 20px rgba(0, 136, 255, 0.8);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn-decode {
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn-decode:hover {
+            background: linear-gradient(135deg, #00cc77, #00ff95);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
+        }
+        
+        .btn-decode:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .decoded-ip {
+            color: #00ff95;
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 149, 0.5);
+        }
+        
+        .next-step {
+            margin-top: 20px;
+        }
+        
+        .next-step a {
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            color: #000;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .next-step a:hover {
+            background: linear-gradient(135deg, #00cc77, #00ff95);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .main-decode-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .ip-display {
+                font-size: 32px;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="decode-container">
+        <div class="decode-header">
+            <h1>🔐 Декодирование IP</h1>
+            <div class="decode-status" id="decodeStatus">Готов к декодированию</div>
+        </div>
+        
+        <div class="main-decode-area">
+            <div class="matrix-section">
+                <div class="matrix-header">🔐 Матрица декодирования</div>
+                <div class="matrix-container" id="matrixContainer">
+                    <div class="matrix-row">
+                        <div class="matrix-cell" data-pos="0">X</div>
+                        <div class="matrix-cell" data-pos="1">Y</div>
+                        <div class="matrix-cell" data-pos="2">Z</div>
+                        <div class="matrix-separator">.</div>
+                        <div class="matrix-cell" data-pos="3">W</div>
+                        <div class="matrix-cell" data-pos="4">V</div>
+                        <div class="matrix-cell" data-pos="5">U</div>
+                        <div class="matrix-separator">.</div>
+                        <div class="matrix-cell" data-pos="6">T</div>
+                        <div class="matrix-cell" data-pos="7">S</div>
+                        <div class="matrix-separator">.</div>
+                        <div class="matrix-cell" data-pos="8">R</div>
+                        <div class="matrix-cell" data-pos="9">Q</div>
+                        <div class="matrix-cell" data-pos="10">P</div>
+                    </div>
+                </div>
+                <div class="matrix-instructions">
+                    <p>🎯 Кликните на символы для их декодирования</p>
+                    <p>💡 Используйте логические правила для декодирования</p>
+                </div>
+            </div>
+            
+            <div class="decoder-section">
+                <div class="decoder-header">🎮 Интерактивный декодер</div>
+                <div class="hint-section" id="hintSection" style="display: none;">
+                    <div class="hint-content">
+                        <span class="hint-icon">💡</span>
+                        <span class="hint-text" id="hintText">Подсказка появится здесь</span>
+                    </div>
+                </div>
+                <div class="decoder-grid" id="decoderGrid">
+                    <!-- Символы будут генерироваться JavaScript -->
+                </div>
+                <div class="decoder-status" id="decoderStatus">Выберите символ для декодирования</div>
+                <div class="progress-indicator">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0/8 символов декодировано</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-decode" id="decodeBtn" onclick="checkDecoding()">🔓 Проверить декодирование</button>
+        </div>
+        
+        <div class="result-section" id="resultSection" style="display: none;">
+            <h3>🎉 IP адрес успешно декодирован!</h3>
+            <div class="result-message" id="resultMessage"></div>
+            <div class="real-ip-display" id="realIpDisplay" style="display: none;"></div>
+            <div class="next-step">
+                <a href="{{ url_for('index') }}">🏠 Вернуться на главную</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const encryptedIp = "XYZ.WVU.TS.RQP";
+        const realIp = "138.124.81.201";
+        const targetUrl = "http://138.124.81.201/";
+        
+        let selectedCell = null;
+        let decodedCells = new Set();
+        let currentDecoding = {};
+        let currentStep = 0;
+        
+        // Логические правила декодирования
+        const decodingRules = {
+            // Правило 1: X = 1 (X = 24-я буква, 24%10 = 4, но это 1)
+            'X': {
+                rule: "X = 24-я буква, но в IP это 1",
+                correctValue: '1',
+                hint: "X - это 24-я буква алфавита, но в IP это 1"
+            },
+            // Правило 2: Y = 3 (Y = 25-я буква, 25%10 = 5, но это 3)
+            'Y': {
+                rule: "Y = 25-я буква, но в IP это 3",
+                correctValue: '3',
+                hint: "Y - это 25-я буква алфавита, но в IP это 3"
+            },
+            // Правило 3: Z = 8 (Z = 26-я буква, 26%10 = 6, но это 8)
+            'Z': {
+                rule: "Z = 26-я буква, но в IP это 8",
+                correctValue: '8',
+                hint: "Z - последняя буква алфавита, но в IP это 8"
+            },
+            // Правило 4: W = 1 (W = 23-я буква, 23%10 = 3, но это 1)
+            'W': {
+                rule: "W = 23-я буква, но в IP это 1",
+                correctValue: '1',
+                hint: "W - это 23-я буква, но в IP это 1"
+            },
+            // Правило 5: V = 2 (V = 22-я буква, 22%10 = 2)
+            'V': {
+                rule: "V = 22-я буква, 22%10 = 2",
+                correctValue: '2',
+                hint: "V - это 22-я буква, 22%10 = 2"
+            },
+            // Правило 6: U = 4 (U = 21-я буква, 21%10 = 1, но это 4)
+            'U': {
+                rule: "U = 21-я буква, но в IP это 4",
+                correctValue: '4',
+                hint: "U - это 21-я буква, но в IP это 4"
+            },
+            // Правило 7: T = 8 (T = 20-я буква, 20%10 = 0, но это 8)
+            'T': {
+                rule: "T = 20-я буква, но в IP это 8",
+                correctValue: '8',
+                hint: "T - это 20-я буква, но в IP это 8"
+            },
+            // Правило 8: S = 1 (S = 19-я буква, 19%10 = 9, но это 1)
+            'S': {
+                rule: "S = 19-я буква, но в IP это 1",
+                correctValue: '1',
+                hint: "S - это 19-я буква, но в IP это 1"
+            },
+            // Правило 9: R = 2 (R = 18-я буква, 18%10 = 8, но это 2)
+            'R': {
+                rule: "R = 18-я буква, но в IP это 2",
+                correctValue: '2',
+                hint: "R - это 18-я буква, но в IP это 2"
+            },
+            // Правило 10: Q = 0 (Q = 17-я буква, 17%10 = 7, но это 0)
+            'Q': {
+                rule: "Q = 17-я буква, но в IP это 0",
+                correctValue: '0',
+                hint: "Q - это 17-я буква, но в IP это 0"
+            },
+            // Правило 11: P = 1 (P = 16-я буква, 16%10 = 6, но это 1)
+            'P': {
+                rule: "P = 16-я буква, но в IP это 1",
+                correctValue: '1',
+                hint: "P - это 16-я буква, но в IP это 1"
+            }
+        };
+        
+        // Правильные значения для декодирования
+        const correctValues = {
+            'X': '1',
+            'Y': '3',
+            'Z': '8',
+            'W': '1',
+            'V': '2',
+            'U': '4',
+            'T': '8',
+            'S': '1',
+            'R': '2',
+            'Q': '0',
+            'P': '1'
+        };
+
+        function init() {
+            generateDecoderGrid();
+            setupMatrixCells();
+            updateStatus('Выберите символ для декодирования');
+        }
+
+        function generateDecoderGrid() {
+            const grid = document.getElementById('decoderGrid');
+            grid.innerHTML = '';
+            
+            // Генерируем сетку символов
+            const symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+            
+            symbols.forEach((symbol, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'decoder-cell';
+                cell.textContent = symbol;
+                cell.dataset.symbol = symbol;
+                cell.onclick = () => selectDecoderSymbol(symbol);
+                grid.appendChild(cell);
+            });
+        }
+
+        function setupMatrixCells() {
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach((cell, index) => {
+                cell.onclick = () => selectMatrixCell(cell, index);
+            });
+        }
+
+        function selectMatrixCell(cell, position) {
+            // Убираем выделение с предыдущей ячейки
+            document.querySelectorAll('.matrix-cell').forEach(c => c.classList.remove('selected'));
+            
+            // Выделяем текущую ячейку
+            cell.classList.add('selected');
+            selectedCell = cell;
+            
+            const symbol = cell.textContent;
+            updateStatus(`Выбран символ: ${symbol}. Выберите значение для декодирования.`);
+            
+            // Показываем подсказку
+            showHint(symbol);
+            
+            // Подсвечиваем возможные значения в декодере
+            highlightDecoderOptions(symbol);
+            
+            // Обновляем прогресс
+            updateProgress();
+        }
+        
+        function showHint(symbol) {
+            const hintSection = document.getElementById('hintSection');
+            const hintText = document.getElementById('hintText');
+            
+            if (decodingRules[symbol]) {
+                hintText.textContent = decodingRules[symbol].hint;
+                hintSection.style.display = 'block';
+            } else {
+                hintSection.style.display = 'none';
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (decodedCells.size / 11) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${decodedCells.size}/11 символов декодировано`;
+        }
+
+        function selectDecoderSymbol(symbol) {
+            if (!selectedCell) {
+                updateStatus('Сначала выберите символ в матрице!');
+                return;
+            }
+            
+            const matrixSymbol = selectedCell.textContent;
+            const position = selectedCell.dataset.pos;
+            
+            // Проверяем правильность декодирования
+            const isCorrect = correctValues[matrixSymbol] === symbol;
+            
+            if (isCorrect) {
+                // Правильное декодирование
+                selectedCell.textContent = symbol;
+                selectedCell.classList.add('decoded');
+                selectedCell.classList.remove('selected');
+                decodedCells.add(position);
+                
+                // Показываем правило
+                const rule = decodingRules[matrixSymbol];
+                updateStatus(`✅ Символ ${matrixSymbol} успешно декодирован в ${symbol}! Правило: ${rule.rule}`);
+                
+                // Обновляем прогресс
+                updateProgress();
+                
+                // Проверяем завершение
+                if (decodedCells.size === 11) {
+                    completeDecoding();
+                } else {
+                    updateStatus('Выберите следующий символ для декодирования.');
+                }
+            } else {
+                // Неправильное декодирование
+                const rule = decodingRules[matrixSymbol];
+                updateStatus(`❌ Неверное декодирование! ${matrixSymbol} не может быть ${symbol}. Правило: ${rule.rule}`);
+                
+                // Анимация ошибки
+                selectedCell.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    selectedCell.style.animation = '';
+                }, 500);
+            }
+            
+            // Сбрасываем выделение
+            document.querySelectorAll('.decoder-cell').forEach(c => c.classList.remove('highlighted'));
+        }
+
+        function highlightDecoderOptions(symbol) {
+            // Показываем только цифры 0-9 для декодирования
+            const options = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            document.querySelectorAll('.decoder-cell').forEach(cell => {
+                if (options.includes(cell.textContent)) {
+                    cell.classList.add('highlighted');
+                } else {
+                    cell.classList.remove('highlighted');
+                }
+            });
+        }
+
+        function completeDecoding() {
+            updateStatus('🎉 Все символы успешно декодированы!');
+            
+            // Скрываем весь интерфейс
+            setTimeout(() => {
+                // Скрываем все секции кроме результата
+                document.querySelector('.matrix-section').style.display = 'none';
+                document.querySelector('.decoder-section').style.display = 'none';
+                document.querySelector('.controls').style.display = 'none';
+                
+                // Показываем только результат
+                const resultSection = document.getElementById('resultSection');
+                const resultMessage = document.getElementById('resultMessage');
+                const realIpDisplay = document.getElementById('realIpDisplay');
+                
+                resultMessage.textContent = 'IP успешно декодирован!';
+                resultMessage.className = 'result-message success';
+                
+                // Красиво отображаем декодированный IP
+                const decodedIp = buildDecodedIp();
+                realIpDisplay.innerHTML = `
+                    <div class="ip-result">
+                        <div class="ip-label">🔓 Декодированный IP:</div>
+                        <div class="ip-address">${decodedIp}</div>
+                        <div class="ip-separator">↓</div>
+                        <div class="ip-label">🌐 Найденный URL:</div>
+                        <div class="url-link">
+                            <a href="${targetUrl}" target="_blank" class="url-button">
+                                ${targetUrl}
+                            </a>
+                        </div>
+                    </div>
+                `;
+                realIpDisplay.style.display = 'block';
+                
+                // Показываем секцию результата
+                resultSection.style.display = 'block';
+                
+            }, 1000);
+        }
+        
+        function buildDecodedIp() {
+            // Собираем декодированный IP из матрицы
+            const cells = document.querySelectorAll('.matrix-cell');
+            let ip = '';
+            cells.forEach((cell, index) => {
+                if (index > 0 && (index === 3 || index === 6 || index === 9)) {
+                    ip += '.';
+                }
+                ip += cell.textContent;
+            });
+            return ip;
+        }
+
+        function updateStatus(message) {
+            document.getElementById('decoderStatus').textContent = message;
+        }
+
+        function checkDecoding() {
+            if (decodedCells.size === 11) {
+                completeDecoding();
+            } else {
+                updateStatus('Сначала декодируйте все символы!');
+            }
+        }
+
+        // Добавляем анимацию тряски
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+            .decoder-cell.highlighted {
+                background: rgba(0, 255, 149, 0.3) !important;
+                border-color: #00ff95 !important;
+                box-shadow: 0 0 15px rgba(0, 255, 149, 0.8) !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

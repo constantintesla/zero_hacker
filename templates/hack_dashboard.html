@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хакерская атака - Zero Hacker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='matrix.css') }}">
+    <style>
+        .hack-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            padding: 20px;
+        }
+        
+        .hack-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .hack-header h1 {
+            color: #00ff95;
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(0, 255, 149, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .hack-status {
+            color: #ff0000;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .main-hack-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .terminal-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+        }
+        
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #00ff95;
+        }
+        
+        .terminal-title {
+            color: #00ff95;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .timer {
+            color: #ff0000;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-body {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .terminal-line {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        
+        .terminal-line:nth-child(1) { animation-delay: 0.1s; }
+        .terminal-line:nth-child(2) { animation-delay: 0.2s; }
+        .terminal-line:nth-child(3) { animation-delay: 0.3s; }
+        .terminal-line:nth-child(4) { animation-delay: 0.4s; }
+        .terminal-line:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .prompt {
+            color: #00ff95;
+        }
+        
+        .command {
+            color: #ffffff;
+        }
+        
+        .output {
+            color: #00ff95;
+            margin-left: 20px;
+        }
+        
+        .output.success {
+            color: #00ff95;
+        }
+        
+        .output.error {
+            color: #ff0000;
+        }
+        
+        .output.warning {
+            color: #ffaa00;
+        }
+        
+        .output.info {
+            color: #0088ff;
+        }
+        
+        .progress-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+        }
+        
+        .progress-header {
+            color: #00ff95;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffaa00, #00ff95);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            color: #00ff95;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .phase-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .phase-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #333;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .phase-item.active {
+            border-left-color: #ffaa00;
+            color: #ffaa00;
+            background: rgba(255, 170, 0, 0.1);
+        }
+        
+        .phase-item.completed {
+            border-left-color: #00ff95;
+            color: #00ff95;
+            background: rgba(0, 255, 149, 0.1);
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #ff0000, #ff4444);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn-start:hover {
+            background: linear-gradient(135deg, #ff4444, #ff0000);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+        
+        .btn-start:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-complete {
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-complete:hover {
+            background: linear-gradient(135deg, #00cc77, #00ff95);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
+        }
+        
+        .btn-complete:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-debug {
+            background: linear-gradient(135deg, #ff8800, #ffaa00);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: #000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .btn-debug:hover {
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 136, 0, 0.4);
+        }
+        
+        .btn-debug:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .encrypted-ip {
+            color: #00ff95;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+        }
+        
+        .next-step {
+            margin-top: 20px;
+        }
+        
+        .next-step a {
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            color: #000;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .next-step a:hover {
+            background: linear-gradient(135deg, #00cc77, #00ff95);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .main-hack-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hack-container">
+        <div class="hack-header">
+            <h1>🚀 Хакерская атака</h1>
+            <div class="hack-status" id="hackStatus">Готов к атаке</div>
+        </div>
+        
+        <div class="main-hack-area">
+            <div class="terminal-section">
+                <div class="terminal-header">
+                    <div class="terminal-title">TERMINAL v3.1.7</div>
+                    <div class="timer" id="timer">20:00</div>
+                </div>
+                <div class="terminal-body" id="terminalBody">
+                    <div class="terminal-line">
+                        <span class="prompt">root@hacker:~$</span>
+                        <span class="command">./init_attack.sh</span>
+                    </div>
+                </div>
+            </div>
+            
+        <div class="progress-section">
+            <div class="progress-header">Прогресс атаки</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">0% - Готов к началу</div>
+                
+                <ul class="phase-list" id="phaseList">
+                    <li class="phase-item" data-phase="0">Сканирование портов...</li>
+                    <li class="phase-item" data-phase="1">Поиск уязвимостей...</li>
+                    <li class="phase-item" data-phase="2">Взлом системы...</li>
+                    <li class="phase-item" data-phase="3">Извлечение данных...</li>
+                    <li class="phase-item" data-phase="4">Шифрование IP адреса...</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-start" id="startBtn" onclick="startHack()">🚀 Начать атаку</button>
+            <button class="btn-complete" id="completeBtn" onclick="completeHack()" disabled>✅ Завершить</button>
+            <button class="btn-debug" id="debugBtn" onclick="speedUpTimer()" disabled>⚡ Ускорить таймер</button>
+        </div>
+        
+        <div class="result-section" id="resultSection">
+            <h3>🎉 Атака завершена!</h3>
+            <p>Найден зашифрованный IP адрес:</p>
+            <div class="encrypted-ip" id="encryptedIp">XYZ.WVU.TS.RQP</div>
+            <div class="password-section" style="margin: 20px 0; padding: 15px; background: rgba(0, 255, 149, 0.1); border: 1px solid #00ff95; border-radius: 5px;">
+                <h4>🔐 Пароль для декодирования:</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 18px; color: #00ff95; font-weight: bold; margin: 10px 0;">HACK_COMPLETE</div>
+                <button onclick="copyPassword('HACK_COMPLETE')" style="background: #00ff95; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">Копировать пароль</button>
+            </div>
+            <div class="next-step">
+                <a href="{{ url_for('decode_ip') }}">Перейти к расшифровке IP</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hackStarted = false;
+        let hackCompleted = false;
+        let timeLeft = 1200; // 20 минут в секундах
+        let timerInterval;
+        let progressInterval;
+        let activityInterval;
+        let currentPhase = 0;
+        let speedMultiplier = 1; // Множитель скорости для отладки
+        
+        const phases = [
+            'Сканирование портов...',
+            'Поип уязвимостей...',
+            'Взлом системы...',
+            'Извлечение данных...',
+            'Шифрование IP адреса...'
+        ];
+        
+        const activities = [
+            'Подключение к серверу...',
+            'Анализ сетевого трафика...',
+            'Поиск открытых портов...',
+            'Сканирование уязвимостей...',
+            'Попытка взлома пароля...',
+            'Обход системы безопасности...',
+            'Извлечение конфиденциальных данных...',
+            'Анализ логов системы...',
+            'Поиск бэкдоров...',
+            'Установка трояна...',
+            'Кража учетных данных...',
+            'Мониторинг активности...',
+            'Сбор информации о сети...',
+            'Анализ протоколов...',
+            'Поиск слабых мест...',
+            'Взлом шифрования...',
+            'Извлечение файлов...',
+            'Скрытие следов...',
+            'Создание резервных копий...',
+            'Подготовка к финальной атаке...'
+        ];
+        
+        function startHack() {
+            if (hackStarted) return;
+            
+            hackStarted = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('debugBtn').disabled = false;
+            document.getElementById('hackStatus').textContent = 'Атака в процессе...';
+            document.getElementById('hackStatus').style.color = '#ffaa00';
+            
+            // Запускаем таймер
+            timerInterval = setInterval(updateTimer, 1000 / speedMultiplier);
+            
+            // Запускаем прогресс (каждые 4 минуты для 5 фаз = 20 минут)
+            progressInterval = setInterval(updateProgress, 240000 / speedMultiplier);
+            
+            // Запускаем активность
+            activityInterval = setInterval(showRandomActivity, 3000 / speedMultiplier);
+            
+            // Добавляем строки в терминал
+            addTerminalLine('Инициализация атаки...', 'info');
+            addTerminalLine('Подключение к целевой системе...', 'info');
+            addTerminalLine('Сканирование открытых портов...', 'info');
+        }
+        
+        function updateTimer() {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Обновляем прогресс на основе времени
+            updateProgressByTime();
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                clearInterval(activityInterval);
+                completeHack();
+            }
+        }
+        
+        function updateProgress() {
+            if (currentPhase < phases.length) {
+                // Активируем текущую фазу
+                const phaseItems = document.querySelectorAll('.phase-item');
+                phaseItems[currentPhase].classList.add('active');
+                
+                // Добавляем строку в терминал
+                addTerminalLine(phases[currentPhase], 'info');
+                
+                // Обновляем прогресс постепенно
+                const progress = ((currentPhase + 1) / phases.length) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = 
+                    `${Math.round(progress)}% - ${phases[currentPhase]}`;
+                
+                currentPhase++;
+            } else {
+                // Если все фазы завершены, но время еще не истекло
+                // Показываем финальную активность
+                if (!hackCompleted) {
+                    addTerminalLine('Ожидание завершения атаки...', 'info');
+                }
+            }
+        }
+        
+        // Функция для обновления прогресса на основе времени
+        function updateProgressByTime() {
+            if (hackCompleted) return;
+            
+            const totalTime = 1200; // 20 минут в секундах
+            const elapsedTime = totalTime - timeLeft;
+            const progressPercent = Math.min((elapsedTime / totalTime) * 100, 100);
+            
+            // Обновляем прогресс-бар
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            
+            // Определяем текущую фазу на основе времени
+            const phaseIndex = Math.min(Math.floor((elapsedTime / totalTime) * phases.length), phases.length - 1);
+            
+            // Активируем фазы по времени
+            const phaseItems = document.querySelectorAll('.phase-item');
+            for (let i = 0; i <= phaseIndex; i++) {
+                if (i < phaseItems.length) {
+                    phaseItems[i].classList.add('active');
+                }
+            }
+            
+            // Обновляем текст прогресса
+            if (phaseIndex < phases.length) {
+                document.getElementById('progressText').textContent = 
+                    `${Math.round(progressPercent)}% - ${phases[phaseIndex]}`;
+            } else {
+                document.getElementById('progressText').textContent = 
+                    `${Math.round(progressPercent)}% - Завершение атаки...`;
+            }
+        }
+        
+        function completeHack() {
+            if (hackCompleted) return;
+            
+            hackCompleted = true;
+            clearInterval(timerInterval);
+            clearInterval(progressInterval);
+            clearInterval(activityInterval);
+            
+            document.getElementById('hackStatus').textContent = 'Атака завершена!';
+            document.getElementById('hackStatus').style.color = '#00ff95';
+            document.getElementById('completeBtn').disabled = true;
+            document.getElementById('debugBtn').disabled = true;
+            
+            // Завершаем все фазы
+            const phaseItems = document.querySelectorAll('.phase-item');
+            phaseItems.forEach(item => {
+                item.classList.remove('active');
+                item.classList.add('completed');
+            });
+            
+            // Добавляем финальные строки
+            addTerminalLine('Атака успешно завершена!', 'success');
+            addTerminalLine('Найден зашифрованный IP: XYZ.WVU.TS.RQP', 'success');
+            addTerminalLine('Пароль для декодирования: HACK_COMPLETE', 'success');
+            addTerminalLine('Готов к следующему этапу...', 'info');
+            
+            // Показываем результат
+            document.getElementById('resultSection').classList.add('show');
+        }
+        
+        function showRandomActivity() {
+            if (hackCompleted) return;
+            
+            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+            const activityTypes = ['info', 'warning', 'error'];
+            const randomType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+            
+            addTerminalLine(randomActivity, randomType);
+        }
+        
+        function speedUpTimer() {
+            if (speedMultiplier >= 10) {
+                alert('Максимальная скорость достигнута!');
+                return;
+            }
+            
+            speedMultiplier *= 2;
+            timeLeft = Math.max(1, Math.floor(timeLeft / 2));
+            
+            // Обновляем интервалы с новой скоростью
+            if (hackStarted && !hackCompleted) {
+                clearInterval(timerInterval);
+                clearInterval(progressInterval);
+                clearInterval(activityInterval);
+                
+                timerInterval = setInterval(updateTimer, 1000 / speedMultiplier);
+                progressInterval = setInterval(updateProgress, 240000 / speedMultiplier);
+                activityInterval = setInterval(showRandomActivity, 3000 / speedMultiplier);
+            }
+            
+            addTerminalLine(`⚡ Скорость увеличена в ${speedMultiplier}x раз!`, 'warning');
+        }
+        
+        function addTerminalLine(text, type = 'info') {
+            const terminalBody = document.getElementById('terminalBody');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            
+            const output = document.createElement('span');
+            output.className = `output ${type}`;
+            output.textContent = text;
+            
+            line.appendChild(output);
+            terminalBody.appendChild(line);
+            
+            // Прокручиваем вниз
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+        
+        function copyPassword(password) {
+            // Пробуем современный API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(password).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    console.error('Ошибка с navigator.clipboard:', err);
+                    fallbackCopyTextToClipboard(password);
+                });
+            } else {
+                fallbackCopyTextToClipboard(password);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            textArea.style.left = "-9999px";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                } else {
+                    showCopyError(text);
+                }
+            } catch (err) {
+                console.error('Ошибка с execCommand:', err);
+                showCopyError(text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function showCopySuccess() {
+            alert('Пароль скопирован в буфер обмена!');
+        }
+        
+        function showCopyError(password) {
+            alert('Не удалось скопировать пароль. Пароль: ' + password);
+        }
+        
+        // Инициализируем страницу при загрузке
+        window.addEventListener('load', function() {
+            // Не запускаем атаку автоматически
+            console.log('Хакерская атака готова к запуску');
+        });
+    </script>
+</body>
+</html>

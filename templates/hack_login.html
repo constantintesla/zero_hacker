@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хакерская атака - Zero Hacker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='matrix.css') }}">
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+        }
+        
+        .login-box {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff95;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 149, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-box h1 {
+            color: #00ff95;
+            margin-bottom: 30px;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            color: #00ff95;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff95;
+            border-radius: 5px;
+            color: #00ff95;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 149, 0.5);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #00cc77, #00ff95);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
+        }
+        
+        .back-link {
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #00ff95;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-link a:hover {
+            text-shadow: 0 0 5px rgba(0, 255, 149, 0.5);
+        }
+        
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .alert-error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .hint {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 149, 0.1);
+            border: 1px solid #00ff95;
+            border-radius: 5px;
+            color: #00ff95;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🔐 Доступ к хакерской атаке</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="password">Пароль доступа:</label>
+                    <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+                </div>
+                
+                <button type="submit" class="btn-login">🚀 Начать атаку</button>
+            </form>
+            
+            <div class="hint">
+                💡 Получите пароль, выполнив первое задание с водяными знаками
+            </div>
+            
+            <div class="back-link">
+                <a href="{{ url_for('index') }}">← Вернуться на главную</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
