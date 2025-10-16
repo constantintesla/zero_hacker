@@ -308,6 +308,7 @@
             grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             margin-bottom: 20px;
+            position: relative;
         }
         
         .decoder-cell {
@@ -328,6 +329,21 @@
             position: relative;
             box-shadow: 0 2px 6px rgba(0, 255, 149, 0.2);
             overflow: hidden;
+        }
+
+        /* Анимации перемешивания */
+        .decoder-grid.shuffling .decoder-cell.shuffle-out {
+            animation: cellOut 0.2s ease forwards;
+        }
+        .decoder-cell.shuffle-in {
+            animation: cellIn 0.35s ease forwards;
+        }
+        @keyframes cellOut {
+            to { opacity: 0; transform: scale(0.8) rotate(-5deg); }
+        }
+        @keyframes cellIn {
+            from { opacity: 0; transform: scale(0.8) rotate(5deg); }
+            to { opacity: 1; transform: scale(1) rotate(0deg); }
         }
         
         .decoder-cell::before {
@@ -1031,6 +1047,36 @@
             });
         }
 
+        function shuffleDecoderGrid() {
+            const grid = document.getElementById('decoderGrid');
+            const cells = Array.from(grid.children);
+            const symbols = cells.map(c => c.dataset.symbol || c.textContent);
+            // Фишер-Йетс перемешивание
+            for (let i = symbols.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [symbols[i], symbols[j]] = [symbols[j], symbols[i]];
+            }
+            // Анимация исчезновения
+            grid.classList.add('shuffling');
+            cells.forEach(c => c.classList.add('shuffle-out'));
+            setTimeout(() => {
+                grid.innerHTML = '';
+                symbols.forEach(symbol => {
+                    const cell = document.createElement('div');
+                    cell.className = 'decoder-cell shuffle-in';
+                    cell.textContent = symbol;
+                    cell.dataset.symbol = symbol;
+                    cell.onclick = () => selectDecoderSymbol(symbol);
+                    grid.appendChild(cell);
+                });
+                // Убираем классы после входной анимации
+                setTimeout(() => {
+                    grid.classList.remove('shuffling');
+                    Array.from(grid.children).forEach(c => c.classList.remove('shuffle-in'));
+                }, 350);
+            }, 200);
+        }
+
         function setupMatrixCells() {
             const cells = document.querySelectorAll('.matrix-cell');
             cells.forEach((cell, index) => {
@@ -1102,6 +1148,9 @@
                 
                 // Обновляем прогресс
                 updateProgress();
+
+                // Перемешиваем сетку декодера с анимацией
+                shuffleDecoderGrid();
                 
                 // Проверяем завершение
                 if (decodedCells.size === 11) {
@@ -1157,17 +1206,22 @@
                 
                 // Красиво отображаем декодированный IP
                 const decodedIp = buildDecodedIp();
+                const targetHost = (() => { try { return new URL(targetUrl).hostname; } catch(e){ return (targetUrl||'').replace(/^https?:\/\//,'').replace(/\/$/,''); } })();
                 realIpDisplay.innerHTML = `
-                    <div class="ip-result">
-                        <div class="ip-label">🔓 Декодированный IP:</div>
-                        <div class="ip-address">${decodedIp}</div>
-                        <div class="ip-separator">↓</div>
-                        <div class="ip-label">🌐 Найденный URL:</div>
-                        <div class="url-link">
-                            <a href="${targetUrl}" target="_blank" class="url-button">
+                    <div class=\"ip-result\">
+                        <div class=\"ip-label\">🔓 Декодированный IP:</div>
+                        <div class=\"ip-address\">${decodedIp}</div>
+                        <div class=\"ip-separator\">↓</div>
+                        <div class=\"ip-label\">🌐 Найденный URL:</div>
+                        <div class=\"url-link\">
+                            <a href=\"${targetUrl}\" target=\"_blank\" class=\"url-button\">
                                 ${targetUrl}
                             </a>
                         </div>
+                    </div>
+                    <div class=\"ip-result\" style=\"margin-top: 16px;\">
+                        <div class=\"ip-label\">🧩 Обнаружен дефолтный ключ доступа к цели ${targetHost}:</div>
+                        <div class=\"ip-address\">12345678</div>
                     </div>
                 `;
                 realIpDisplay.style.display = 'block';

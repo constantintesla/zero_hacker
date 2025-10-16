@@ -53,10 +53,10 @@
 						<span class="output">[SUCCESS] Watermark revealed!</span>
 					</div>
 					<div class="terminal-line hidden" id="terminal-data">
-						<span class="output">[DATA] Hidden message: <span class="password" id="hiddenPassword">ZERO_HACKER_2024</span></span>
+						<span class="output">[DATA] Hidden message: <span class="password" id="hiddenPassword">{{ settings.watermark.hidden_message }}</span></span>
 					</div>
 					<div class="terminal-line hidden" id="terminal-password">
-						<span class="output">[INFO] Password for next task: <span class="password" id="nextTaskPassword">HACK_LEVEL_2</span></span>
+						<span class="output">[INFO] Password for next task: <span class="password" id="nextTaskPassword">{{ settings.watermark.password_for_next }}</span></span>
 					</div>
 					<div class="terminal-line" id="terminal-cursor">
 						<span class="prompt">root@steganography:~$</span>
@@ -72,7 +72,7 @@
 			<div class="slider-group">
 				<label for="brightness">Яркость:</label>
 				<div class="slider-container">
-					<input type="range" id="brightness" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<input type="range" id="brightness" min="0" max="100" value="50" class="slider">
 					<div class="hot-cold-indicator" id="brightnessIndicator"></div>
 				</div>
 				<span id="brightnessValue">50%</span>
@@ -81,7 +81,7 @@
 			<div class="slider-group">
 				<label for="contrast">Контрастность:</label>
 				<div class="slider-container">
-					<input type="range" id="contrast" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<input type="range" id="contrast" min="0" max="100" value="50" class="slider">
 					<div class="hot-cold-indicator" id="contrastIndicator"></div>
 				</div>
 				<span id="contrastValue">50%</span>
@@ -90,7 +90,7 @@
 			<div class="slider-group">
 				<label for="gamma">Гамма-коррекция:</label>
 				<div class="slider-container">
-					<input type="range" id="gamma" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<input type="range" id="gamma" min="0" max="100" value="50" class="slider">
 					<div class="hot-cold-indicator" id="gammaIndicator"></div>
 				</div>
 				<span id="gammaValue">50%</span>
@@ -99,7 +99,7 @@
 			<div class="slider-group">
 				<label for="saturation">Насыщенность:</label>
 				<div class="slider-container">
-					<input type="range" id="saturation" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<input type="range" id="saturation" min="0" max="100" value="50" class="slider">
 					<div class="hot-cold-indicator" id="saturationIndicator"></div>
 				</div>
 				<span id="saturationValue">50%</span>
@@ -108,7 +108,7 @@
 			<div class="slider-group">
 				<label for="hue">Оттенок:</label>
 				<div class="slider-container">
-					<input type="range" id="hue" min="0" max="100" value="50" class="slider" oninput="applyFilters()">
+					<input type="range" id="hue" min="0" max="100" value="50" class="slider">
 					<div class="hot-cold-indicator" id="hueIndicator"></div>
 				</div>
 				<span id="hueValue">50%</span>
@@ -120,7 +120,7 @@
 		<div class="password-revealed">
 			<h4>🔐 Пароль для следующего задания:</h4>
 			<div class="password-box">
-				<code id="nextPassword" onclick="selectPassword()" title="Нажмите для выделения">HACK_LEVEL_2</code>
+				<code id="nextPassword" onclick="selectPassword()" title="Нажмите для выделения">{{ settings.watermark.password_for_next }}</code>
 			</div>
 			<p class="copy-hint">💡 Нажмите на пароль для выделения</p>
 		</div>
@@ -135,7 +135,7 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		background: rgba(0, 0, 0, 0.95);
+		background: rgba(0, 0, 0, 0.98);
 		border: 2px solid #00ff95;
 		border-radius: 15px;
 		padding: 30px;
@@ -216,6 +216,9 @@
 	const imageContainer = document.getElementById('imageContainer');
 	const watermarkedImage = document.getElementById('watermarkedImage');
 	const resultPanel = document.getElementById('resultPanel');
+	
+	// Отслеживаем, какие слайдеры трогал пользователь
+	const touchedSliders = new Set();
 	
 	// Автоматически загружаем изображение по умолчанию при загрузке страницы
 	window.addEventListener('load', () => {
@@ -308,6 +311,9 @@
 			const valueSpan = document.getElementById(slider.id + 'Value');
 			
 			slider.addEventListener('input', () => {
+				// Отмечаем слайдер как тронутый пользователем
+				touchedSliders.add(slider.id);
+				
 				valueSpan.textContent = slider.value + '%';
 				applyFilters();
 				checkWatermarkReveal();
@@ -323,49 +329,46 @@
 		const hue = document.getElementById('hue').value;
 		
 		// Применяем CSS фильтры для проявления водяной метки
-		// Используем более агрессивные фильтры для лучшей видимости
+		// Каждый слайдер влияет только на свой параметр
 		const brightnessValue = brightness / 100;
 		const contrastValue = contrast / 100;
 		const saturationValue = saturation / 100;
 		const hueValue = hue * 3.6;
 		
-		// Создаем более заметные эффекты
-		const filterValue = `
-			brightness(${brightnessValue}) 
-			contrast(${contrastValue}) 
-			saturate(${saturationValue}) 
-			hue-rotate(${hueValue}deg)
-			sepia(0.1)
-			invert(0.05)
-		`;
+		// Создаем фильтры с базовыми значениями, которые изменяются только тронутыми слайдерами
+		let filterValue = '';
+		
+		// Базовые фильтры всегда применяются
+		filterValue += 'sepia(0.1) invert(0.05) ';
+		
+		// Применяем только те фильтры, которые трогал пользователь
+		if (touchedSliders.has('brightness')) {
+			filterValue += `brightness(${brightnessValue}) `;
+		}
+		
+		if (touchedSliders.has('contrast')) {
+			filterValue += `contrast(${contrastValue}) `;
+		}
+		
+		if (touchedSliders.has('saturation')) {
+			filterValue += `saturate(${saturationValue}) `;
+		}
+		
+		if (touchedSliders.has('hue')) {
+			filterValue += `hue-rotate(${hueValue}deg) `;
+		}
 		
 		watermarkedImage.style.filter = filterValue;
 		
-		// Добавляем дополнительные эффекты для проявления водяной метки
-		const watermarkOverlay = document.getElementById('watermarkOverlay');
-		
-		if (brightness >= 60 && contrast >= 70) {
-			watermarkedImage.style.mixBlendMode = 'multiply';
-			watermarkedImage.style.opacity = '0.9';
-			
-			// Показываем оверлей водяной метки
-			watermarkOverlay.style.opacity = '0.8';
-			watermarkOverlay.style.display = 'block';
-		} else {
-			watermarkedImage.style.mixBlendMode = 'normal';
-			watermarkedImage.style.opacity = '1';
-			
-			// Скрываем оверлей
-			watermarkOverlay.style.opacity = '0';
-			watermarkOverlay.style.display = 'none';
-		}
+		// Оверлей управляется только в checkWatermarkReveal()
+		// Здесь только применяем фильтры
 		
 		// Обновляем терминал в зависимости от прогресса
 		updateTerminalProgress(brightness, contrast, gamma, saturation, hue);
 	}
 	
 	function updateTerminalProgress(brightness, contrast, gamma, saturation, hue) {
-		// Показываем строки терминала постепенно
+		// Элементы терминала
 		const loading = document.getElementById('terminal-loading');
 		const scanning = document.getElementById('terminal-scanning');
 		const warn = document.getElementById('terminal-warn');
@@ -374,47 +377,61 @@
 		const data = document.getElementById('terminal-data');
 		const password = document.getElementById('terminal-password');
 		
-		// Всегда показываем загрузку
-		if (loading.classList.contains('hidden')) {
+		// Числовые значения
+		const b = parseInt(brightness); 
+		const c = parseInt(contrast); 
+		const g = parseInt(gamma); 
+		const s = parseInt(saturation); 
+		const h = parseInt(hue);
+		
+		// Цели и допуск
+		const targetBrightness = 60, targetContrast = 70, targetGamma = 50, targetSaturation = 60, targetHue = 40;
+		const tolerance = 5;
+		
+		const brightnessOk = Math.abs(b - targetBrightness) <= tolerance;
+		const contrastOk = Math.abs(c - targetContrast) <= tolerance;
+		const gammaOk = Math.abs(g - targetGamma) <= tolerance;
+		const saturationOk = Math.abs(s - targetSaturation) <= tolerance;
+		const hueOk = Math.abs(h - targetHue) <= tolerance;
+		
+		const touchedCount = touchedSliders.size;
+		const allOk = brightnessOk && contrastOk && gammaOk && saturationOk && hueOk;
+		
+		// Показываем загрузку только после первого взаимодействия
+		if (touchedCount > 0 && loading.classList.contains('hidden')) {
 			loading.classList.remove('hidden');
 			loading.classList.add('typing');
 		}
 		
-		// Показываем сканирование при любом движении ползунков
-		if (brightness > 10 || contrast > 10 || gamma > 10 || saturation > 10 || hue > 10) {
-			if (scanning.classList.contains('hidden')) {
-				scanning.classList.remove('hidden');
-				scanning.classList.add('typing');
-			}
+		// Сканирование при любом взаимодействии
+		if (touchedCount > 0 && scanning.classList.contains('hidden')) {
+			scanning.classList.remove('hidden');
+			scanning.classList.add('typing');
 		}
 		
-		// Показываем предупреждение если значения далеки от целевых
-		const targetBrightness = 60, targetContrast = 70, targetGamma = 50, targetSaturation = 60, targetHue = 40;
-		const tolerance = 5;
-		
-		const brightnessOk = Math.abs(brightness - targetBrightness) <= tolerance;
-		const contrastOk = Math.abs(contrast - targetContrast) <= tolerance;
-		const gammaOk = Math.abs(gamma - targetGamma) <= tolerance;
-		const saturationOk = Math.abs(saturation - targetSaturation) <= tolerance;
-		const hueOk = Math.abs(hue - targetHue) <= tolerance;
-		
-		if (!brightnessOk || !contrastOk || !gammaOk || !saturationOk || !hueOk) {
+		// Предупреждение, если есть взаимодействие и не все в допуске
+		if (touchedCount > 0 && !allOk) {
 			if (warn.classList.contains('hidden')) {
 				warn.classList.remove('hidden');
 				warn.classList.add('typing');
 			}
+		} else if (touchedCount > 0 && allOk) {
+			// Скрываем предупреждение, если все стали ок
+			if (!warn.classList.contains('hidden')) {
+				warn.classList.add('hidden');
+			}
 		}
 		
-		// Показываем настройку фильтров при приближении к целевым значениям
-		if (brightness > 40 || contrast > 50 || gamma > 30 || saturation > 40 || hue > 20) {
+		// Adjusting показываем когда отрегулировано хотя бы 2 слайдера
+		if (touchedCount >= 2) {
 			if (adjusting.classList.contains('hidden')) {
 				adjusting.classList.remove('hidden');
 				adjusting.classList.add('typing');
 			}
 		}
 		
-		// Показываем успех и данные только при достижении всех целевых значений
-		if (brightnessOk && contrastOk && gammaOk && saturationOk && hueOk) {
+		// SUCCESS/DATA/PASSWORD — только когда отрегулированы все 5 слайдеров и все в допуске
+		if (touchedCount === 5 && allOk) {
 			if (success.classList.contains('hidden')) {
 				success.classList.remove('hidden');
 				success.classList.add('typing');
@@ -427,46 +444,79 @@
 				password.classList.remove('hidden');
 				password.classList.add('typing');
 			}
-			
-			// Показываем паттерн водяной метки
-			const watermarkPattern = document.querySelector('.watermark-pattern');
-			if (watermarkPattern) {
+		} else {
+			// Скрываем успех/данные/пароль, если условия больше не выполняются
+			if (!success.classList.contains('hidden')) success.classList.add('hidden');
+			if (!data.classList.contains('hidden')) data.classList.add('hidden');
+			if (!password.classList.contains('hidden')) password.classList.add('hidden');
+		}
+		
+		// Паттерн водяной метки — только при выполнении условий успеха
+		const watermarkPattern = document.querySelector('.watermark-pattern');
+		if (watermarkPattern) {
+			if (touchedCount === 5 && allOk) {
 				watermarkPattern.style.display = 'block';
 				watermarkPattern.style.opacity = '1';
-			}
-		} else {
-			// Скрываем паттерн если значения неправильные
-			const watermarkPattern = document.querySelector('.watermark-pattern');
-			if (watermarkPattern) {
+			} else {
 				watermarkPattern.style.display = 'none';
 				watermarkPattern.style.opacity = '0';
 			}
 		}
 		
-		// Обновляем индикаторы "горячо-холодно"
-		updateHotColdIndicators(brightness, contrast, gamma, saturation, hue);
+		// Обновляем индикаторы
+		updateHotColdIndicators(b, c, g, s, h);
 	}
 	
 	function updateHotColdIndicators(brightness, contrast, gamma, saturation, hue) {
 		const targets = { brightness: 60, contrast: 70, gamma: 50, saturation: 60, hue: 40 };
 		const tolerance = 5;
 		
-		// Обновляем каждый индикатор
-		updateIndicator('brightnessIndicator', brightness, targets.brightness, tolerance);
-		updateIndicator('contrastIndicator', contrast, targets.contrast, tolerance);
-		updateIndicator('gammaIndicator', gamma, targets.gamma, tolerance);
-		updateIndicator('saturationIndicator', saturation, targets.saturation, tolerance);
-		updateIndicator('hueIndicator', hue, targets.hue, tolerance);
+		// Обновляем только те индикаторы, которые соответствуют тронутым слайдерам
+		if (touchedSliders.has('brightness')) {
+			updateIndicator('brightnessIndicator', brightness, targets.brightness, tolerance);
+		} else {
+			updateIndicator('brightnessIndicator', brightness, targets.brightness, tolerance, false);
+		}
+		
+		if (touchedSliders.has('contrast')) {
+			updateIndicator('contrastIndicator', contrast, targets.contrast, tolerance);
+		} else {
+			updateIndicator('contrastIndicator', contrast, targets.contrast, tolerance, false);
+		}
+		
+		if (touchedSliders.has('gamma')) {
+			updateIndicator('gammaIndicator', gamma, targets.gamma, tolerance);
+		} else {
+			updateIndicator('gammaIndicator', gamma, targets.gamma, tolerance, false);
+		}
+		
+		if (touchedSliders.has('saturation')) {
+			updateIndicator('saturationIndicator', saturation, targets.saturation, tolerance);
+		} else {
+			updateIndicator('saturationIndicator', saturation, targets.saturation, tolerance, false);
+		}
+		
+		if (touchedSliders.has('hue')) {
+			updateIndicator('hueIndicator', hue, targets.hue, tolerance);
+		} else {
+			updateIndicator('hueIndicator', hue, targets.hue, tolerance, false);
+		}
 	}
 	
-	function updateIndicator(id, current, target, tolerance) {
+	function updateIndicator(id, current, target, tolerance, isTouched = true) {
 		const indicator = document.getElementById(id);
 		if (!indicator) return;
 		
-		const distance = Math.abs(current - target);
-		
 		// Убираем все классы
 		indicator.className = 'hot-cold-indicator';
+		
+		// Если слайдер не был тронут, показываем нейтральный индикатор
+		if (!isTouched) {
+			indicator.classList.add('neutral');
+			return;
+		}
+		
+		const distance = Math.abs(current - target);
 		
 		if (distance <= tolerance) {
 			// Идеально - синий с пульсацией
@@ -498,19 +548,82 @@
 		const targetBrightness = 60, targetContrast = 70, targetGamma = 50, targetSaturation = 60, targetHue = 40;
 		const tolerance = 5;
 		
-		const brightnessOk = Math.abs(brightness - targetBrightness) <= tolerance;
-		const contrastOk = Math.abs(contrast - targetContrast) <= tolerance;
-		const gammaOk = Math.abs(gamma - targetGamma) <= tolerance;
-		const saturationOk = Math.abs(saturation - targetSaturation) <= tolerance;
-		const hueOk = Math.abs(hue - targetHue) <= tolerance;
+		// Отладочная информация
+		console.log('Touched sliders:', Array.from(touchedSliders));
+		console.log('Values:', { brightness, contrast, gamma, saturation, hue });
 		
-		if (brightnessOk && contrastOk && gammaOk && saturationOk && hueOk) {
+		// Проверяем только те слайдеры, которые трогал пользователь
+		// Результат показывается только если ВСЕ тронутые слайдеры находятся в правильном диапазоне
+		let allTouchedSlidersOk = true;
+		
+		// Если пользователь не трогал ни одного слайдера, не показываем результат
+		if (touchedSliders.size === 0) {
+			allTouchedSlidersOk = false;
+			console.log('No sliders touched, hiding result');
+		} else {
+			// Проверяем каждый тронутый слайдер
+			if (touchedSliders.has('brightness')) {
+				const brightnessOk = Math.abs(brightness - targetBrightness) <= tolerance;
+				console.log('Brightness check:', brightness, targetBrightness, brightnessOk);
+				allTouchedSlidersOk = allTouchedSlidersOk && brightnessOk;
+			}
+			
+			if (touchedSliders.has('contrast')) {
+				const contrastOk = Math.abs(contrast - targetContrast) <= tolerance;
+				console.log('Contrast check:', contrast, targetContrast, contrastOk);
+				allTouchedSlidersOk = allTouchedSlidersOk && contrastOk;
+			}
+			
+			if (touchedSliders.has('gamma')) {
+				const gammaOk = Math.abs(gamma - targetGamma) <= tolerance;
+				console.log('Gamma check:', gamma, targetGamma, gammaOk);
+				allTouchedSlidersOk = allTouchedSlidersOk && gammaOk;
+			}
+			
+			if (touchedSliders.has('saturation')) {
+				const saturationOk = Math.abs(saturation - targetSaturation) <= tolerance;
+				console.log('Saturation check:', saturation, targetSaturation, saturationOk);
+				allTouchedSlidersOk = allTouchedSlidersOk && saturationOk;
+			}
+			
+			if (touchedSliders.has('hue')) {
+				const hueOk = Math.abs(hue - targetHue) <= tolerance;
+				console.log('Hue check:', hue, targetHue, hueOk);
+				allTouchedSlidersOk = allTouchedSlidersOk && hueOk;
+			}
+		}
+		
+		console.log('All touched sliders OK:', allTouchedSlidersOk);
+		console.log('Touched sliders count:', touchedSliders.size);
+		
+		// Управляем оверлеем водяной метки
+		const watermarkOverlay = document.getElementById('watermarkOverlay');
+		
+		// Оверлей показывается только если:
+		// 1. Пользователь тронул ВСЕ 5 слайдеров
+		// 2. ВСЕ тронутые слайдеры одновременно находятся в правильном диапазоне
+		console.log('Should show overlay:', touchedSliders.size === 5 && allTouchedSlidersOk);
+		if (touchedSliders.size === 5 && allTouchedSlidersOk) {
+			// Показываем оверлей только если все тронутые слайдеры в правильном диапазоне
+			watermarkOverlay.style.opacity = '0.8';
+			watermarkOverlay.style.display = 'block';
+		} else {
+			// Скрываем оверлей
+			watermarkOverlay.style.opacity = '0';
+			watermarkOverlay.style.display = 'none';
+		}
+		
+		// Показываем результат только если пользователь отрегулировал все 5 слайдеров
+		// и ВСЕ тронутые слайдеры находятся в правильном диапазоне
+		if (touchedSliders.size === 5 && allTouchedSlidersOk) {
+			console.log('Showing result panel');
 			resultPanel.style.display = 'block';
 			// Добавляем анимацию появления
 			resultPanel.style.animation = 'fadeIn 0.5s ease-in';
 			// Показываем пароль для следующего задания
 			showPasswordForNextTask();
 		} else {
+			console.log('Hiding result panel');
 			resultPanel.style.display = 'none';
 		}
 	}

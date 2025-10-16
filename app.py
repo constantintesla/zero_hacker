@@ -20,17 +20,17 @@ REAL_IP = "192.168.1.100"  # Реальный IP для проверки
 
 # Админ настройки
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "matrix2024")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "1488")
 
 # Настройки заданий (будут управляться через админку)
 TASK_SETTINGS = {
     'watermark': {
         'enabled': True,
-        'required_brightness': 60,  # Снижено с 80
-        'required_contrast': 70,    # Снижено с 85
+        'required_brightness': 80,  # Снижено с 80
+        'required_contrast': 30,    # Снижено с 85
         'required_gamma': 50,       # Снижено с 75
-        'required_saturation': 60,  # Снижено с 90
-        'required_hue': 40,        # Снижено с 60
+        'required_saturation': 70,  # Снижено с 90
+        'required_hue': 20,        # Снижено с 60
         'hidden_message': 'ZERO_HACKER_2024',
         'password_for_next': 'HACK_LEVEL_2'
     },
@@ -51,7 +51,7 @@ TASK_SETTINGS = {
         'enabled': True,
         'encrypted_ip': 'XYZ.WVU.TS.RQP',
         'real_ip': '138.124.81.201',
-        'decoder_steps': 11
+        'decoder_steps': 10
     }
 }
 
@@ -77,7 +77,7 @@ def watermark_task():
                 
                 return jsonify({"success": True, "image": img_str})
     
-    return render_template("watermark.html")
+    return render_template("watermark.html", settings=TASK_SETTINGS)
 
 @app.route("/watermark/default")
 def get_default_image():
